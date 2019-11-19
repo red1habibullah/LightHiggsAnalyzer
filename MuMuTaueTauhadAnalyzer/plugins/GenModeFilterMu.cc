@@ -304,7 +304,7 @@ iSetup.get<SetupRecord>().get(pSetup);
    cout<< "mu count " <<tmtm<<endl;
    cout<<" Double mu count " << tmtmGlob<<endl;
    
-   GoodMode=((tmthfill> 0) /*&&*(!DoubleMu)*/);
+   GoodMode=((tmthfill> 0) && (!DoubleMu));
    if(DoubleMu)
      {cout<< "lutha!"<<endl;}
    
