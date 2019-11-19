@@ -521,7 +521,6 @@ TauComparatorAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
 		       
 		       chargedIsoPtSum->Fill(itau->tauID("chargedIsoPtSum"),itau_cl->tauID("chargedIsoPtSum"));
 		       chargedIsoPtSum->SetOption("COLZ");
-
 		       neutralIsoPtSum->Fill(itau->tauID("neutralIsoPtSum"),itau_cl->tauID("neutralIsoPtSum"));
 		       neutralIsoPtSum->SetOption("COLZ");
 		       //}
