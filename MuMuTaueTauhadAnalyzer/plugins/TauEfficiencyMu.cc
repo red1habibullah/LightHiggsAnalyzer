@@ -83,25 +83,49 @@ private:
   edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenToken_;
 
   edm::EDGetTokenT<pat::MuonCollection> muonSrc_;
+  
+  edm::EDGetTokenT<reco::PFJetCollection> jetSrc_;
 
   TEfficiency* TauEff;
   TEfficiency* TauEffDMode;
   TEfficiency* TauEffDModes;
   
+  TEfficiency* TauEffDMode0;
+  TEfficiency* TauEffDMode1;
+  TEfficiency* TauEffDMode5;
+  TEfficiency* TauEffDMode6;
+  TEfficiency* TauEffDMode10;
+  TH1D* TauPt;
+  TH1D* JetPt;
+  
+  
   double dRTauGenTau=99999;
   double dRTauGenDecay=99999;
+  
+  double dRJetGenTau=99999;
+  double dRJetGenDecay=99999;
 
   double dRMuGenMu=99999;
   double dRMuGenDecay=99999;
+  
+  double dRTauJet=99999;
+  
+  int NumCount=0;
+  int DenomCount=0;
+  
 
+  int NumCountIso=0;
+  int DenomCountIso=0;
+
+  int NumCount0=0;
+  int DenomCount0=0;
+
+  int Counter=0;
 
 };
 
 //
-// constants, enums and typedefs
-//
-
-//
+// constants, enums and type//
 // static data member definitions
 //
 
@@ -111,7 +135,8 @@ private:
 TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
   TauSrc_(consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("Taus"))),
   prunedGenToken_ (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("pruned"))),
-  muonSrc_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonSrc")))
+  muonSrc_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonSrc"))),
+  jetSrc_(consumes<reco::PFJetCollection>(iConfig.getParameter<edm::InputTag>("jetSrc")))
 
   
 {
@@ -123,8 +148,16 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    TauEff = f->make<TEfficiency>("TauEff","Tau Reconstruction  Efficiency;Pt(GeV);#epsilon",nbins,edges);
    TauEffDMode = f->make<TEfficiency>("TauEffDMode","Tau DecayMode  Efficiency;Pt(GeV);#epsilon",nbins,edges);
    TauEffDModes = f->make<TEfficiency>("TauEffDModes","Tau DecayMode  Efficiency;DecayModes;#epsilon",12,-0.5,11.5);
+   TauEffDMode0 = f->make<TEfficiency>("TauEffDMode0","Tau DecayMode  Efficiency for Decay Mode 0 -> 1 Prong ;Pt(GeV);#epsilon",nbins,edges);
+   TauEffDMode1 = f->make<TEfficiency>("TauEffDMode1","Tau DecayMode  Efficiency for Decay Mode 1 -> 1 Prong + 1 #pi 0 ;Pt(GeV);#epsilon",nbins,edges);
+   TauEffDMode5 = f->make<TEfficiency>("TauEffDMode5","Tau DecayMode  Efficiency for Decay Mode 5 -> 1 Prong + N #pi 0  ;Pt(GeV);#epsilon",nbins,edges);
+   TauEffDMode6= f->make<TEfficiency>("TauEffDMode6","Tau DecayMode  Efficiency for Decay Mode 6 -> 2 Prong ;Pt(GeV);#epsilon",nbins,edges);
+   TauEffDMode10 = f->make<TEfficiency>("TauEffDMode10","Tau DecayMode  Efficiency for Decay Mode 10 -> 3 Prong ;Pt(GeV);#epsilon",nbins,edges);
+   TauPt= f->make<TH1D>("TauPt","Tau Pt distribution;Pt(GeV);# of Events",100,0,100);
+   JetPt= f->make<TH1D>("JetPt","Jet Pt distribution;Pt(GeV);# of Events",200,0,200);
 
 
+   
 
 
 
@@ -210,6 +243,9 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    Handle<pat::MuonCollection> Muon;
    iEvent.getByToken(muonSrc_,Muon);
 
+   edm::Handle<reco::PFJetCollection> pfJets;
+   iEvent.getByToken(jetSrc_, pfJets);
+
 
    
    double PseudoTauPhi=99999;
@@ -231,7 +267,8 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    bool MuFound=false;
    bool MuDecay=false;
 
-
+   bool TmuThad=false;
+   
    for(size_t i=0; i<(pruned.product())->size() ;i++)
      {
        if(fabs((*pruned)[i].pdgId())==15)
@@ -239,13 +276,19 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
            const Candidate * Tau = &(*pruned)[i];
            if (fabs(Tau->mother()->pdgId())==36)
              {
+	       cout << " Tau from PseudoScalar " <<endl;
+	       
                const Candidate *PseudoTau = &(*pruned)[i];
                unsigned  n=PseudoTau->numberOfDaughters();
-
+	       
                for ( size_t j =0; j < n ; j++)
                  {
-                   const Candidate * Daughter=PseudoTau->daughter(j);
-                   if ((fabs(Daughter->pdgId())==13))
+                   
+		   
+		   const Candidate * Daughter=PseudoTau->daughter(j);
+                   
+		   cout<< " Daughter no:  "<< j << "  pdgId: " << Daughter->pdgId() <<endl;
+		   if ((fabs(Daughter->pdgId())==13))
                      {   
 
                        MuFound=true;
@@ -273,6 +316,8 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                    if(fabs(Daughter->pdgId())==15)
                      {
                        isHad=!isSpecificDaughter(Daughter,13) && !isSpecificDaughter(Daughter,14);
+		       isMuon=isSpecificDaughter(Daughter,13);
+
 		       if(isHad)
 			 {
 			                                                                  
@@ -306,66 +351,131 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
      }
 
-
-  
-
-
-
-
-   for(pat::MuonCollection::const_iterator iMuon = Muon->begin() ; iMuon !=Muon->end() ; ++iMuon)
+   
+   TmuThad=((TauFound) || (TauDecay )) && ((MuFound) || (MuDecay));
+   if(TmuThad)
      {
+       ++Counter;
+     }
 
-
-
-
-   for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
-
+   for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
      {
-       bool PassDecayMode= false;
-       bool AnalysisCuts= false;
-       bool GenMatched =false;
-
-       if(TauFound)
-	 {
-	   dRTauGenTau=reco::deltaR(PseudoTauEta,PseudoTauPhi,itau->eta(),itau->phi());
-                                                                                                                                      
-	 }
-
-       if(TauDecay)
-	 {
-	   dRTauGenDecay=reco::deltaR(DecayTauEta,DecayTauPhi,itau->eta(),itau->phi());
-
-	 }
-       if(MuFound)
-	 {
-	   dRMuGenMu=reco::deltaR(MuEta,MuPhi,iMuon->eta(),iMuon->phi());
        
-	 }
-       if(MuDecay)
+       
+       
+       for(pat::MuonCollection::const_iterator iMuon = Muon->begin() ; iMuon !=Muon->end() ; ++iMuon)
 	 {
-	   dRMuGenDecay=reco::deltaR(MuDecayEta,MuDecayPhi,iMuon->eta(),iMuon->phi());
+	   
+	   
+	   
 
+	   //for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
+	     
+	   //{
+	   //bool PassDecayMode= false;
+	       bool AnalysisCuts= false;
+	       bool GenMatched =false;
+	       
+	       if(TauFound)
+		 {
+		   
+		   dRJetGenTau=reco::deltaR(PseudoTauEta,PseudoTauPhi,iJet->eta(),iJet->phi());
+
+		 }
+	       
+	       if(TauDecay)
+		 {
+		  
+		   dRJetGenDecay=reco::deltaR(DecayTauEta,DecayTauPhi,iJet->eta(),iJet->phi());
+		   
+		 }
+	       if(MuFound)
+		 {
+		   dRMuGenMu=reco::deltaR(MuEta,MuPhi,iMuon->eta(),iMuon->phi());
+	   
+		 }
+	       if(MuDecay)
+		 {
+		   dRMuGenDecay=reco::deltaR(MuDecayEta,MuDecayPhi,iMuon->eta(),iMuon->phi());
+		   
+		 }
+	       
+	       GenMatched= ((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && ((MuFound && (dRMuGenMu < 0.1)) || (MuDecay && (dRMuGenDecay<0.1)));
+	       AnalysisCuts= /*((itau->pt()) > 10 && (abs(itau->eta()) <2.3)) &&*/ ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
+	       
+	       
+	       if(GenMatched && AnalysisCuts)
+		 {
+		   ++DenomCount;
+		   for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau) 
+		     {
+		       bool PassDecayMode= false;
+		       dRTauJet=reco::deltaR(*itau,*iJet);
+		       
+		       
+		       PassDecayMode=(itau->tauID("decayModeFinding")) && (dRTauJet< 0.1);
+		       
+		       if(PassDecayMode)
+			 {
+			   ++NumCount;
+			 }
+		       
+		       
+		       
+		       TauEffDMode->Fill(PassDecayMode,itau->pt());
+		       TauEffDModes->Fill(PassDecayMode,itau->decayMode());
+		       
+		       
+    
+
+		       if((itau->decayMode())==0)
+			 {
+			   ++DenomCount0;
+			   TauEffDMode0->Fill(PassDecayMode,itau->pt());
+			   
+			   if(PassDecayMode)
+			     {
+			       
+			   ++NumCount0;
+			     }
+			 }
+		       if((itau->decayMode())==1)
+			 {
+			   TauEffDMode1->Fill(PassDecayMode,itau->pt());
+			   
+			 }
+		       if((itau->decayMode())==5)
+			 {
+			   TauEffDMode5->Fill(PassDecayMode,itau->pt());
+			   
+			 }
+		       if((itau->decayMode())==6)
+			 {
+			   TauEffDMode6->Fill(PassDecayMode,itau->pt());
+			   
+			 }
+		       if((itau->decayMode())==10)
+			 {
+			   TauEffDMode10->Fill(PassDecayMode,itau->pt());
+		       
+			 }
+		       
+		       
+
+		       
+		     }
+		   
+		   
+		   
+		   
+		 }
+	       
+	       //}
+	       
 	 }
-
-       GenMatched=((TauFound && (dRTauGenTau < 0.1)) || (TauDecay && (dRTauGenDecay<0.1))) && ((MuFound && (dRMuGenMu < 0.1)) || (MuDecay && (dRMuGenDecay<0.1)));
-       AnalysisCuts= ((itau->pt()) > 10 && (abs(itau->eta()) <2.3));
-
-
-       if(GenMatched && AnalysisCuts)
-	 {
-           PassDecayMode=itau->tauID("decayModeFinding");
-           TauEffDMode->Fill(PassDecayMode,itau->pt());
-           TauEffDModes->Fill(PassDecayMode,itau->decayMode());
-
-
-	 }
-
-
-
+       
      }
-
-
-     }
+   
 
 
 
@@ -417,12 +527,17 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        
        
 
-       GenMatched=((TauFound && (dRTauGenTau < 0.1)) || (TauDecay && (dRTauGenDecay<0.1)));   
+       GenMatched=((TauFound && (dRTauGenTau < 0.1)) || (TauDecay && (dRTauGenDecay<0.1))) && ((MuFound && (dRMuGenMu < 0.1)) || (MuDecay && (dRMuGenDecay<0.1)));   
        AnalysisCuts= ((itau->pt()) > 10 && (abs(itau->eta()) <2.3));
        if ( PassDecayMode && GenMatched && AnalysisCuts)
 	 {
+	   ++DenomCountIso;
 	   PassMVA=((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")));
 	   
+	   if(PassMVA)
+	     {
+	       ++NumCountIso;
+	     }
 	   TauEff->Fill(PassMVA,itau->pt());
 	 }
        
@@ -430,15 +545,33 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 
      }
+   for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
+
+     {
+       TauPt->Fill(itau->pt());
+       
+     
+     }
+
+   for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
+     {
+
+       JetPt->Fill(iJet->pt());
+     }   
 
 
 
 
+   std::cout<< " denominator DMode: " <<  DenomCount <<endl;
+   std::cout<< " Numerator DMode: " <<  NumCount <<endl;
+   std::cout<< "########################"<<std::endl;
+   //std::cout<< " denominator Iso: " <<  DenomCountIso  <<endl;
+   //std::cout<< " Numerator Iso: " <<  NumCountIso <<endl;
 
+   std::cout<< " denominator DMode0: " <<  DenomCount0 <<std::endl;                                                                                                                                                                                                              std::cout<< " Numerator DMode0: " <<  NumCount0 <<std::endl;  
+   std::cout<< "************************"<<std::endl;
 
-
-
-
+   std::cout<< "TaumuTauhad: "<< Counter <<std::endl;
 }
 
 
