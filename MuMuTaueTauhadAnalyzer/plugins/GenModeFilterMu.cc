@@ -282,8 +282,8 @@ GenModeFilterMu::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   
 	 }
      }
-   cout<<" TaumTauHadPointer: " <<tmthfill<<endl;
-   cout<< " TaumTauHadCount : " <<tmth<<endl;
+   //cout<<" TaumTauHadPointer: " <<tmthfill<<endl;
+   //cout<< " TaumTauHadCount : " <<tmth<<endl;
    
    bool GoodMode= false;
    bool DoubleMu=false;
@@ -301,8 +301,8 @@ ESHandle<SetupData> pSetup;
 iSetup.get<SetupRecord>().get(pSetup);
 #endif
    */
-   cout<< "mu count " <<tmtm<<endl;
-   cout<<" Double mu count " << tmtmGlob<<endl;
+   //cout<< "mu count " <<tmtm<<endl;
+   // cout<<" Double mu count " << tmtmGlob<<endl;
    
    GoodMode=((tmthfill> 0) && (!DoubleMu));
    if(DoubleMu)
