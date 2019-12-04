@@ -87,14 +87,30 @@ private:
   edm::EDGetTokenT<reco::PFJetCollection> jetSrc_;
 
   TEfficiency* TauEff;
+  
+  
+  
+  TH1F* NumDMode;
+  TH1F* DenomDMode;
   TEfficiency* TauEffDMode;
+  
   TEfficiency* TauEffDModes;
   
+  TH1F* NumDMode0;
   TEfficiency* TauEffDMode0;
+  
+  TH1F* NumDMode1;
   TEfficiency* TauEffDMode1;
+  
+  TH1F* NumDMode5;
   TEfficiency* TauEffDMode5;
+  
+  TH1F* NumDMode6;
   TEfficiency* TauEffDMode6;
+  
+  TH1F* NumDMode10;
   TEfficiency* TauEffDMode10;
+  
   TH1D* TauPt;
   TH1D* JetPt;
   
@@ -146,13 +162,32 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    const int  nbins =5;
    double edges[nbins+1]={10,15,20,30,50,100};
    TauEff = f->make<TEfficiency>("TauEff","Tau Reconstruction  Efficiency;Pt(GeV);#epsilon",nbins,edges);
-   TauEffDMode = f->make<TEfficiency>("TauEffDMode","Tau DecayMode  Efficiency;Pt(GeV);#epsilon",nbins,edges);
+   
+   NumDMode = f->make<TH1F>("NumDMode","Numerator for Reconstruction Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
+   DenomDMode = f->make<TH1F>("DenomDMode","DEnominator for Reconstruction Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
+   
+   TauEffDMode = f->make<TEfficiency>("TauEffDMode","Tau DecayMode  Efficiency;Jet Pt(GeV);#epsilon",nbins,edges);
+   
+   
    TauEffDModes = f->make<TEfficiency>("TauEffDModes","Tau DecayMode  Efficiency;DecayModes;#epsilon",12,-0.5,11.5);
-   TauEffDMode0 = f->make<TEfficiency>("TauEffDMode0","Tau DecayMode  Efficiency for Decay Mode 0 -> 1 Prong ;Pt(GeV);#epsilon",nbins,edges);
-   TauEffDMode1 = f->make<TEfficiency>("TauEffDMode1","Tau DecayMode  Efficiency for Decay Mode 1 -> 1 Prong + 1 #pi 0 ;Pt(GeV);#epsilon",nbins,edges);
-   TauEffDMode5 = f->make<TEfficiency>("TauEffDMode5","Tau DecayMode  Efficiency for Decay Mode 5 -> 1 Prong + N #pi 0  ;Pt(GeV);#epsilon",nbins,edges);
-   TauEffDMode6= f->make<TEfficiency>("TauEffDMode6","Tau DecayMode  Efficiency for Decay Mode 6 -> 2 Prong ;Pt(GeV);#epsilon",nbins,edges);
-   TauEffDMode10 = f->make<TEfficiency>("TauEffDMode10","Tau DecayMode  Efficiency for Decay Mode 10 -> 3 Prong ;Pt(GeV);#epsilon",nbins,edges);
+   
+   NumDMode0 = f->make<TH1F>("NumDMode0","Numerator for Reconstruction Efficiency for Decay Mode 0 -> 1 Prong ;Jet Pt(GeV);# of Events",nbins,edges);
+   TauEffDMode0 = f->make<TEfficiency>("TauEffDMode0","Tau DecayMode  Efficiency for Decay Mode 0 -> 1 Prong ;Jet Pt(GeV);#epsilon",nbins,edges);
+   
+   
+   NumDMode1 = f->make<TH1F>("NumDMode1","Numerator for Reconstruction Efficiency for Decay Mode 1 -> 1 Prong + 1 #pi 0  ;Jet Pt(GeV);# of Events",nbins,edges);
+   TauEffDMode1 = f->make<TEfficiency>("TauEffDMode1","Tau DecayMode  Efficiency for Decay Mode 1 -> 1 Prong + 1 #pi 0 ;Jet Pt(GeV);#epsilon",nbins,edges);
+   
+   NumDMode5 = f->make<TH1F>("NumDMode5","Numerator for Reconstruction Efficiency for Decay Mode 5 -> 1 Prong + N #pi 0  ;Jet Pt(GeV);# of Events",nbins,edges);
+   TauEffDMode5 = f->make<TEfficiency>("TauEffDMode5","Tau DecayMode  Efficiency for Decay Mode 5 -> 1 Prong + N #pi 0  ;Jet Pt(GeV);#epsilon",nbins,edges);
+   
+   
+   NumDMode6 = f->make<TH1F>("NumDMode6","Numerator for Reconstruction Efficiency for Decay Mode 6 -> 2 Prong ;Jet Pt(GeV);# of Events",nbins,edges);
+   TauEffDMode6= f->make<TEfficiency>("TauEffDMode6","Tau DecayMode  Efficiency for Decay Mode 6 -> 2 Prong ;Jet Pt(GeV);#epsilon",nbins,edges);
+   
+   NumDMode10 = f->make<TH1F>("NumDMode10","Numerator for Reconstruction Efficiency for Decay Mode 10 -> 3 Prong ;Jet Pt(GeV);# of Events",nbins,edges);
+   TauEffDMode10 = f->make<TEfficiency>("TauEffDMode10","Tau DecayMode  Efficiency for Decay Mode 10 -> 3 Prong ;Jet Pt(GeV);#epsilon",nbins,edges);
+   
    TauPt= f->make<TH1D>("TauPt","Tau Pt distribution;Pt(GeV);# of Events",100,0,100);
    JetPt= f->make<TH1D>("JetPt","Jet Pt distribution;Pt(GeV);# of Events",200,0,200);
 
@@ -373,8 +408,8 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	     
 	   //{
 	   //bool PassDecayMode= false;
-	       bool AnalysisCuts= false;
-	       bool GenMatched =false;
+	   bool AnalysisCuts= false;
+	   bool GenMatched =false;
 	       
 	       if(TauFound)
 		 {
@@ -407,6 +442,8 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	       if(GenMatched && AnalysisCuts)
 		 {
 		   ++DenomCount;
+		   DenomDMode->Fill(iJet->pt());
+		   
 		   for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau) 
 		     {
 		       bool PassDecayMode= false;
@@ -418,6 +455,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		       if(PassDecayMode)
 			 {
 			   ++NumCount;
+			   NumDMode->Fill(iJet->pt());
 			 }
 		       
 		       
@@ -431,33 +469,36 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		       if((itau->decayMode())==0)
 			 {
 			   ++DenomCount0;
-			   TauEffDMode0->Fill(PassDecayMode,itau->pt());
 			   
-			   if(PassDecayMode)
-			     {
-			       
-			   ++NumCount0;
-			     }
+			   TauEffDMode0->Fill(PassDecayMode,itau->pt());
 			 }
-		       if((itau->decayMode())==1)
+		       if(((itau->decayMode())==0) && PassDecayMode)
+			     {
+			       NumDMode0->Fill(iJet->pt());
+			       ++NumCount0;
+			     }
+			 
+		       if(((itau->decayMode())==1) && PassDecayMode)
 			 {
 			   TauEffDMode1->Fill(PassDecayMode,itau->pt());
-			   
+			   NumDMode1->Fill(iJet->pt());
+
 			 }
-		       if((itau->decayMode())==5)
+		       if(((itau->decayMode())==5) && PassDecayMode)
 			 {
 			   TauEffDMode5->Fill(PassDecayMode,itau->pt());
-			   
+			   NumDMode5->Fill(iJet->pt());
+
 			 }
-		       if((itau->decayMode())==6)
+		       if(((itau->decayMode())==6) && PassDecayMode)
 			 {
 			   TauEffDMode6->Fill(PassDecayMode,itau->pt());
-			   
+			   NumDMode6->Fill(iJet->pt());
 			 }
-		       if((itau->decayMode())==10)
+		       if((itau->decayMode())==10 && PassDecayMode)
 			 {
 			   TauEffDMode10->Fill(PassDecayMode,itau->pt());
-		       
+			   NumDMode10->Fill(iJet->pt());
 			 }
 		       
 		       
@@ -476,7 +517,8 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        
      }
    
-
+   //TauEffDMode->TEfficiency(NumDMode,DenomDMode);
+   
 
 
 
@@ -568,7 +610,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    //std::cout<< " denominator Iso: " <<  DenomCountIso  <<endl;
    //std::cout<< " Numerator Iso: " <<  NumCountIso <<endl;
 
-   std::cout<< " denominator DMode0: " <<  DenomCount0 <<std::endl;                                                                                                                                                                                                              std::cout<< " Numerator DMode0: " <<  NumCount0 <<std::endl;  
+   std::cout<< " denominator DMode0: " <<  DenomCount<<std::endl;                                                                                                                                                                                                              std::cout<< " Numerator DMode0: " <<  NumCount0 <<std::endl;  
    std::cout<< "************************"<<std::endl;
 
    std::cout<< "TaumuTauhad: "<< Counter <<std::endl;
@@ -585,6 +627,7 @@ TauEfficiencyMu::beginJob()
 void 
 TauEfficiencyMu::endJob() 
 {
+  //TauEffDMode->TauEffDMode(*DenomDMode,*NumDMode);
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
