@@ -15,8 +15,6 @@
 //         Created:  Thu, 24 Oct 2019 13:58:05 GMT
 //
 //
-
-
 // system include files
 #include <memory>
 
@@ -50,6 +48,11 @@
 
 #include "TEfficiency.h"
 
+#include "Math/LorentzVector.h"
+
+#include "Math/VectorUtil.h"
+
+#include "TLorentzVector.h"
 //
 // class declaration
 //
@@ -67,8 +70,9 @@ class TauEfficiencyMu : public edm::one::EDAnalyzer<edm::one::SharedResources>  
   bool isSpecificDaughter(const reco::Candidate * particle,int Id);
   double RefToDaughterPhi(const reco::Candidate * particle,int Id);
   double RefToDaughterEta(const reco::Candidate * particle,int Id);
-
-
+  double RefToDaughterPt(const reco::Candidate * particle,int Id);
+  bool isFSR(const reco::Candidate * daughter);
+  std::vector<const reco::Candidate*>FindStat1Vis( const reco::Candidate * particle);
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   
   
@@ -92,6 +96,13 @@ private:
   
   TH1F* NumDMode;
   TH1F* DenomDMode;
+  
+  TH1D* NumdR;
+  TH1D* DenomdR;
+
+  TH1D *NumVis;
+  TH1D *DenomVis;
+  
   TEfficiency* TauEffDMode;
   
   TEfficiency* TauEffDModes;
@@ -126,6 +137,12 @@ private:
   
   double dRTauJet=99999;
   
+  
+  double dRTauMu=99999;
+  double dRDecayTauMu=99999;
+  double dRTauDecayMu=99999;
+  double dRDecayTauDecayMu=99999;
+
   int NumCount=0;
   int DenomCount=0;
   
@@ -137,9 +154,11 @@ private:
   int DenomCount0=0;
 
   int Counter=0;
-
+  int TauHad_Counter=0;
+  int TauDecay_Counter=0;
 };
 
+//
 //
 // constants, enums and type//
 // static data member definitions
@@ -164,7 +183,13 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    TauEff = f->make<TEfficiency>("TauEff","Tau Reconstruction  Efficiency;Pt(GeV);#epsilon",nbins,edges);
    
    NumDMode = f->make<TH1F>("NumDMode","Numerator for Reconstruction Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
-   DenomDMode = f->make<TH1F>("DenomDMode","DEnominator for Reconstruction Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
+   DenomDMode = f->make<TH1F>("DenomDMode","Denominator for Reconstruction Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
+  
+   NumdR = f->make<TH1D>("NumdR","Numerator for Reconstruction Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
+   DenomdR = f->make<TH1D>("DenomdR","Denominator for Reconstruction Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
+   
+   NumVis = f->make<TH1D>("NumVis","Numerator for Reconstruction Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
+   DenomVis = f->make<TH1D>("DenomVis","Denominator for Reconstruction Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
    
    TauEffDMode = f->make<TEfficiency>("TauEffDMode","Tau DecayMode  Efficiency;Jet Pt(GeV);#epsilon",nbins,edges);
    
@@ -212,7 +237,7 @@ TauEfficiencyMu::~TauEfficiencyMu()
 
 bool TauEfficiencyMu::isSpecificDaughter(const reco::Candidate * particle,int Id)
 {
-  if ((fabs(particle->pdgId())==Id))
+  if ((fabs(particle->pdgId())==Id) && (particle->status()==1))
     return true;
   for(size_t i=0;i <particle->numberOfDaughters();i++)
     {
@@ -226,7 +251,7 @@ double TauEfficiencyMu::RefToDaughterPhi(const reco::Candidate * particle,int Id
 {
 
   double Phi=0;
-  if ((fabs(particle->pdgId())==Id))
+  if ((fabs(particle->pdgId())==Id) && (particle->status()==1))
     return particle->phi();
   for( size_t i=0;i <particle->numberOfDaughters();i++)
     {
@@ -243,7 +268,7 @@ double TauEfficiencyMu::RefToDaughterEta(const reco::Candidate * particle,int Id
 {
 
   double Eta=0;
-  if ((fabs(particle->pdgId())==Id))
+  if ((fabs(particle->pdgId())==Id) && (particle->status()==1))
     return particle->eta();
   for( size_t i=0;i <particle->numberOfDaughters();i++)
     {
@@ -254,6 +279,83 @@ double TauEfficiencyMu::RefToDaughterEta(const reco::Candidate * particle,int Id
   return Eta;
 }
 
+double TauEfficiencyMu::RefToDaughterPt(const reco::Candidate * particle,int Id)
+{
+
+  double Pt=0;
+  if ((fabs(particle->pdgId())==Id) && (particle->status()==1))
+    return particle->pt();
+  for( size_t i=0;i <particle->numberOfDaughters();i++)
+    {
+      if(RefToDaughterPt(particle->daughter(i),Id))
+        Pt=particle->daughter(i)->pt();
+
+    }
+  return Pt;
+}
+
+
+
+std::vector<const reco::Candidate*>TauEfficiencyMu::FindStat1Vis( const reco::Candidate * particle)
+
+{
+  
+  std::vector<const reco::Candidate*> visParticles;
+  if (particle->status() == 1)
+    {
+      if (fabs(particle->pdgId()) != 14 && fabs(particle->pdgId()) != 16)
+
+      {
+	visParticles.push_back(particle);
+	
+      }
+    }
+  else
+    { 
+      
+      int nGrandDaughters= particle->numberOfDaughters();
+      for (int i=0; i < nGrandDaughters; i++)
+	{
+	  const reco::Candidate* GrandDaughter= particle->daughter(i);
+	  std::cout<< " GrandDaughter no:  "<< i << "  pdgId: " << GrandDaughter->pdgId() <<" GrandDaughter Pt: " << GrandDaughter->pt()<<" GrandDaughter Status: " << GrandDaughter->status()<<std::endl;
+
+	  if(GrandDaughter->status() == 1)
+	    {
+	      if(fabs(GrandDaughter->pdgId()) != 14 && fabs(GrandDaughter->pdgId()) != 16)
+		{
+		  visParticles.push_back(GrandDaughter);
+		  
+		}
+	    }
+	  else
+	    {
+	      auto auxVisParticles = FindStat1Vis(GrandDaughter);
+	      visParticles.insert(visParticles.end(), auxVisParticles.begin(), auxVisParticles.end());
+	    }
+	}
+    }
+  return visParticles;
+}
+
+
+
+
+bool TauEfficiencyMu::isFSR(const reco::Candidate * Daughter)
+{
+  if ((Daughter->status()==1) && (fabs(Daughter->pdgId())== 15))
+    return true;
+  
+  for( size_t i=0;i <Daughter->numberOfDaughters();i++)
+    {
+     
+	  if(isFSR(Daughter->daughter(i))) return true;
+	
+	 
+      
+    }
+  return false;
+
+}
 
 
 
@@ -295,9 +397,26 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    double MuDecayEta=99999;
    double MuDecayPhi=99999;
    
+   //TLorentzVector Tau_Undecayed;
+   //TLorentzVector Tau_Had;
+   TLorentzVector VisProducts;
+   TLorentzVector VisHad;
+   TLorentzVector VisDecayMuon;
+   TLorentzVector VisDecayHad;
+   //TLorentzVector Tau_Neutrino;
+   //double Tau_had_pt_v1=99999;
+   double Tau_had_pt_v2=99999;
+   // double dRTauMu=99999;
+   // double dRDecayTauMu=99999;
+   // double dRTauDecayMu=99999;
+   // double dRDecayTauDecayMu=99999;
+   
    
    bool TauFound=false;
    bool TauDecay=false;
+   
+   //bool TauCalc= false;
+   
 
    bool MuFound=false;
    bool MuDecay=false;
@@ -308,12 +427,14 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      {
        if(fabs((*pruned)[i].pdgId())==15)
          {
-           const Candidate * Tau = &(*pruned)[i];
+	   
+	   const Candidate * Tau = &(*pruned)[i];
            if (fabs(Tau->mother()->pdgId())==36)
              {
 	       cout << " Tau from PseudoScalar " <<endl;
 	       
                const Candidate *PseudoTau = &(*pruned)[i];
+	       cout<< " Tau Pt: " << PseudoTau->pt() <<endl;
                unsigned  n=PseudoTau->numberOfDaughters();
 	       
                for ( size_t j =0; j < n ; j++)
@@ -321,76 +442,222 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                    
 		   
 		   const Candidate * Daughter=PseudoTau->daughter(j);
-                   
-		   cout<< " Daughter no:  "<< j << "  pdgId: " << Daughter->pdgId() <<endl;
-		   if ((fabs(Daughter->pdgId())==13))
+                   std::vector <const reco::Candidate*> daughters;
+		   daughters.clear();
+		   std::vector<const reco::Candidate*> Decaydaughters;
+		   Decaydaughters.clear();
+		   
+		   cout<< " Daughter no:  "<< j << "  pdgId: " << Daughter->pdgId() <<" Daughter Pt: " << Daughter->pt()<<" Daughter Status: " << Daughter->status()<<endl;
+		   bool isHad= false;
+		   bool isMuon=false;
+		   bool FSR=false;
+		   
+		   
+		   if(fabs(Daughter->pdgId())==15)
+                     {
+                      
+		       FSR=isFSR(Daughter);
+		       
+		       
+		       cout<<" ************** FSR Flag****************: " << FSR <<endl; 
+		       if(!FSR)    
+			 {
+			   Decaydaughters=FindStat1Vis(Daughter);
+			   
+			   for (unsigned int jDau = 0; jDau < Decaydaughters.size(); jDau++)
+                             {
+			       cout<<" Recursive Visible  Decaydaughter pdgId :  " <<  Decaydaughters[jDau]->pdgId() << "  Recursive Visible Decaydaughter Status: "<<   Decaydaughters[jDau]->status()  <<" Recursive Visible Decaydaughter Pt:"<< Decaydaughters[jDau]->pt()<<endl;
+			       
+			       //------------------------Decayed Tau_mu-----------------------------------------------
+			       if(fabs(Decaydaughters[jDau]->pdgId())==13)
+				 {
+				   
+				   VisDecayMuon +=TLorentzVector(Decaydaughters[jDau]->p4().px(),Decaydaughters[jDau]->p4().py(),Decaydaughters[jDau]->p4().pz(),Decaydaughters[jDau]->p4().e());
+				   
+				   cout<<" Recursively Identified Muon pdgId : " << Decaydaughters[jDau]->pdgId() << " Recursively identified Muon  Status:    "<<   Decaydaughters[jDau]->status()  <<" Recursively Identified Muon Pt: "<< Decaydaughters[jDau]->pt()<<endl;
+
+				   isMuon=true;
+				 }
+			       //-------------------------------Decayed viz Tau_Had------------------------------------
+			       else
+				 {
+				   VisDecayHad+=TLorentzVector(Decaydaughters[jDau]->p4().px(),Decaydaughters[jDau]->p4().py(),Decaydaughters[jDau]->p4().pz(),Decaydaughters[jDau]->p4().e());
+				   cout<<"  Recursively Identified Hadron pdgId : " << Decaydaughters[jDau]->pdgId() << " Recursively identified Hadron  Status:  "<<   Decaydaughters[jDau]->status()  <<"  Recursive Identified  Hadron Pt:"<< Decaydaughters[jDau]->pt()<<endl;
+				   isHad=true;
+				 }
+			       
+			       
+			       
+			     }
+			   
+
+			 
+			   
+			   if(isHad && (VisDecayHad.Pt() >10) && (fabs(VisDecayHad.Eta()) <2.3))
+			     {
+			       
+			       TauDecay=true;
+			       
+			       DecayTauPhi=VisDecayHad.Phi();
+			       DecayTauEta=VisDecayHad.Eta();			       
+			       cout<< " Decay Had Pt: "<< VisDecayHad.Pt()<<endl;
+			       cout<< " Decay Had Eta: "<< VisDecayHad.Eta()<<endl;
+			       cout<< " Decay Had Phi: "<< VisDecayHad.Phi()<<endl;
+
+
+			     }
+			   if(isMuon && (VisDecayMuon.Pt() >3) && (fabs(VisDecayMuon.Eta()) <2.4) )
+			     {
+			       
+			       MuDecay=true;
+			       MuDecayEta=VisDecayMuon.Eta();
+			       
+			       MuDecayPhi=VisDecayMuon.Phi();
+			       cout<< " Decay Muon Pt: "<< VisDecayMuon.Pt()<<endl;
+			       cout<< " Decay Muon Eta: "<< VisDecayMuon.Eta()<<endl;
+			       cout<< " Decay Muon Phi: "<< VisDecayMuon.Phi()<<endl;
+
+
+			     }
+			   
+			 }
+			 
+		     }
+		   
+		   ///----------------------------------------------Tau_mu-------------------------------------------------------------
+		   if ((fabs(Daughter->pdgId())==13) && ((Daughter->pt())>3) && (abs(Daughter->eta()) < 2.4) && (Daughter->status()==1))
                      {   
 
                        MuFound=true;
-
+		       
                        MuEta=(double)(Daughter->eta());
 		       MuPhi=(double)(Daughter->phi());
 
 
                      }
-
-		   
-		   
-		   
-		   
-		   if( (!TauFound) && (fabs(Daughter->pdgId())!=13) &&  (fabs(Daughter->pdgId())!=14) && (fabs(Daughter->pdgId())!=15) && (fabs(Daughter->pdgId())!=22) && (fabs(Daughter->pdgId())!=16)  )
-                     {
-                                                                                                                                       
-                       TauFound=true;
-                                                                                          
-                       PseudoTauPhi=(double)(PseudoTau->phi());
-                       PseudoTauEta=(double)(PseudoTau->eta());
-                     }
-		   bool isHad= false;
-		   bool isMuon=false;
-                   if(fabs(Daughter->pdgId())==15)
-                     {
-                       isHad=!isSpecificDaughter(Daughter,13) && !isSpecificDaughter(Daughter,14);
-		       isMuon=isSpecificDaughter(Daughter,13);
-
-		       if(isHad)
+      		   ///---------------------------viz Tau_had--------------------------------------------------------------------------
+		   if((fabs(Daughter->pdgId())!=13) &&  (fabs(Daughter->pdgId())!=14) && (fabs(Daughter->pdgId())!=15) &&  (fabs(Daughter->pdgId())!=16)  && (fabs(Daughter->pdgId())!=22) // && ((PseudoTau->pt()) > 10) && (abs(PseudoTau->eta()) <2.3 
+		      )
+																											   
+		     {
+		       if(Daughter->status()==1)
 			 {
-			                                                                  
-			   TauDecay=true;
-			                                                               
-			   DecayTauPhi=PseudoTau->phi();
-			   DecayTauEta=PseudoTau->eta();
+			   VisHad +=TLorentzVector(Daughter->p4().px(),Daughter->p4().py(),Daughter->p4().pz(),Daughter->p4().e());
 
-
+			 } 
+			 
+		       else
+			 {
+			   daughters = FindStat1Vis(Daughter);
+			   
+			   for (unsigned int jDau = 0; jDau < daughters.size(); jDau++)
+			     {
+			       VisHad +=TLorentzVector(daughters[jDau]->p4().px(),daughters[jDau]->p4().py(),daughters[jDau]->p4().pz(),daughters[jDau]->p4().e());
+			       cout<<" Recursive daughter pdgId : " << daughters[jDau]->pdgId() << "Recursive Daughter Status:    "<<   daughters[jDau]->status()  <<" Recursive Daughter Pt:"<< daughters[jDau]->pt()<<endl; 
+			     }
+			   
 			 }
-		       if(isMuon)
-                         {
-                             
-                           MuDecay=true;
-                           MuDecayEta=RefToDaughterEta(Daughter,13);
-                           MuDecayPhi=RefToDaughterPhi(Daughter,13);
-                         }
+		     }
+		     
+		     
+
+		   
+		   
+		   if((fabs(Daughter->pdgId())!=13) &&  (fabs(Daughter->pdgId())!=14) && (fabs(Daughter->pdgId())!=15) && (fabs(Daughter->pdgId())!=22) // && ((PseudoTau->pt()) > 10) && (abs(PseudoTau->eta()) <2.3)
+		      )
+                     {
+		       
+		     
+		   // if((fabs(Daughter->pdgId())==16))
+		   // 	 {
+			   
+		   // 	   cout<< " Daughter  Neutrino :  "<< j << "  pdgId: " << Daughter->pdgId() <<" Pt:     "<< Daughter->pt()<<endl;
+
+		   // 	   Tau_Neutrino+=TLorentzVector(Daughter->p4().px(),Daughter->p4().py(),Daughter->p4().pz(),Daughter->p4().e());			 
+		   // 	 }
+		     
+		       if((fabs(Daughter->pdgId())!=16))
+			 {
+		       //cout<< " Daughter in Tau Had:  "<< j << "  pdgId: " << Daughter->pdgId() <<" Pt:     "<< Daughter->pt()<<endl;
+			   VisProducts +=TLorentzVector(Daughter->p4().px(),Daughter->p4().py(),Daughter->p4().pz(),Daughter->p4().e());
+ 
+		     // if(!TauCalc)
+		     // 	 {
+		     // 	   cout<<" Tau Stored Pt: "<< PseudoTau->pt() <<endl;
+		     //   Tau_Undecayed+=TLorentzVector(PseudoTau->p4().px(),PseudoTau->p4().py(),PseudoTau->p4().pz(),PseudoTau->p4().e());
+		     //   TauCalc=true;
+			 }
+		     }
+		   
+		 
+
+		   
+		   
+		   
+		   
+		   
+		   
+		   
+		   // if( (!TauFound) && (fabs(Daughter->pdgId())!=13) &&  (fabs(Daughter->pdgId())!=14) && (fabs(Daughter->pdgId())!=15) && (fabs(Daughter->pdgId())!=22) &&  (fabs(Daughter->pdgId())!=16) // && ((PseudoTau->pt()) > 10) && (abs(PseudoTau->eta()) <2.3)
+		   //     )
+                   //   {
+                                                                                                                                       
+                   //     TauFound=true;
+		   //     //cout<< " Daughter no:  "<< j << "  pdgId: " << Daughter->pdgId() <<endl;
+                   //     PseudoTauPhi=(double)(PseudoTau->phi());
+                   //     PseudoTauEta=(double)(PseudoTau->eta());
+                   //   }
+		   
+		   
+		   
+		   
+		   
+		 
 
 
-                     }
 
-                 }
+		 }
 
-
+	       
              }
-
-
+	   
+	   
          }
-
-
+       
+       
+       
+     }
+      
+   if( (VisHad.Pt() >10) && (fabs(VisHad.Eta()) <2.3))
+ 
+     {
+       TauFound=true;
+       PseudoTauPhi=(double)(VisHad.Phi() );
+       PseudoTauEta=(double)(VisHad.Eta());
 
      }
+   if(TauFound)
+     {
+     Tau_had_pt_v2=(double)VisProducts.Pt();
+     cout<<" Vis Had Pt_v1: "<<Tau_had_pt_v2<<endl;
+     cout<< "Vis Had Pt : "<<(double)VisHad.Pt()<<endl; 
+     cout<< "Vis Had Eta: "<<(double)VisHad.Eta()<<endl;
 
+     }
+   
    
    TmuThad=((TauFound) || (TauDecay )) && ((MuFound) || (MuDecay));
    if(TmuThad)
      {
        ++Counter;
+     }
+   if(TauFound)
+     {
+       ++TauHad_Counter;
+     }
+   if(TauDecay)
+     {
+       ++TauDecay_Counter;
      }
 
    for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
@@ -408,45 +675,110 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	     
 	   //{
 	   //bool PassDecayMode= false;
-	   bool AnalysisCuts= false;
+	   //bool AnalysisCuts= false;
 	   bool GenMatched =false;
+	   bool TauMu =false;
+	   bool TauDecayMu = false;
+	   bool DecayTauMu = false;
+	   bool DecayTauDecayMu= false;
 	       
-	       if(TauFound)
-		 {
-		   
-		   dRJetGenTau=reco::deltaR(PseudoTauEta,PseudoTauPhi,iJet->eta(),iJet->phi());
-
-		 }
+	   if(TauFound)
+	     {
 	       
-	       if(TauDecay)
-		 {
-		  
-		   dRJetGenDecay=reco::deltaR(DecayTauEta,DecayTauPhi,iJet->eta(),iJet->phi());
-		   
+	       dRJetGenTau=reco::deltaR(PseudoTauEta,PseudoTauPhi,iJet->eta(),iJet->phi());
+	       
 		 }
-	       if(MuFound)
-		 {
-		   dRMuGenMu=reco::deltaR(MuEta,MuPhi,iMuon->eta(),iMuon->phi());
 	   
-		 }
-	       if(MuDecay)
-		 {
+	   if(TauDecay)
+	     {
+	       
+	       dRJetGenDecay=reco::deltaR(DecayTauEta,DecayTauPhi,iJet->eta(),iJet->phi());
+	       
+	     }
+	   if(MuFound)
+	     {
+	       dRMuGenMu=reco::deltaR(MuEta,MuPhi,iMuon->eta(),iMuon->phi());
+	       
+	     }
+	   if(MuDecay)
+	     {
 		   dRMuGenDecay=reco::deltaR(MuDecayEta,MuDecayPhi,iMuon->eta(),iMuon->phi());
 		   
-		 }
+	     }
+	   
+	   if(TauFound && MuFound)
+	     {
+	       dRTauMu=reco::deltaR(PseudoTauEta,PseudoTauPhi,MuEta,MuPhi);
+	       TauMu=true;
+	       //cout<<" dRTauMu: "<< dRTauMu<<endl;
+
+	     }
+	   if(TauFound && MuDecay)
+	     {
+	       dRTauDecayMu=reco::deltaR(PseudoTauEta,PseudoTauPhi,MuDecayEta,MuDecayPhi);
+	       TauDecayMu = true;
+	       //cout<<" dRTauDecayMu: "<< dRTauDecayMu<<endl;
+
+	     }
+	   if(TauDecay && MuFound)
+	     {
+	       dRDecayTauMu=reco::deltaR(DecayTauEta,DecayTauPhi,MuEta,MuPhi);
+	       DecayTauMu = true;
+	       //cout<<" dRDecayTauMu: "<< dRDecayTauMu<<endl;
+
+	     }
+	   if(TauDecay && MuDecay)
+	     {
+	       dRDecayTauDecayMu=reco::deltaR(DecayTauEta,DecayTauPhi,MuDecayEta,MuDecayPhi);
+	       DecayTauDecayMu= true;
+	       //cout<<" dRDecayTauDecayMu: "<< dRDecayTauDecayMu<<endl;
+	     }
+	   
+	   
+	       
+
 	       
 	       GenMatched= ((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && ((MuFound && (dRMuGenMu < 0.1)) || (MuDecay && (dRMuGenDecay<0.1)));
-	       AnalysisCuts= /*((itau->pt()) > 10 && (abs(itau->eta()) <2.3)) &&*/ ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
+	       //AnalysisCuts= /*((itau->pt()) > 10 && (abs(itau->eta()) <2.3)) &&*/ ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
 	       
 	       
-	       if(GenMatched && AnalysisCuts)
+	       if(GenMatched /*&& AnalysisCuts*/)
 		 {
 		   ++DenomCount;
 		   DenomDMode->Fill(iJet->pt());
+		   if(TauMu)
+		     {
+		       DenomdR->Fill(dRTauMu);
+		     }
+		   if(TauDecayMu)
+		     {
+		       DenomdR->Fill(dRTauDecayMu);
+		     }
+		   if(DecayTauMu)
+		     {
+		       DenomdR->Fill(dRDecayTauMu);
+		     }
+		   if (DecayTauDecayMu)
+		     {
+		       DenomdR->Fill(dRDecayTauDecayMu);
+		     }
 		   
+		   if(TauFound)
+		     {
+		       DenomVis->Fill((double)VisHad.Pt());
+		       
+		     }
+		   if(TauDecay)
+                     {
+                       DenomVis->Fill((double)VisDecayHad.Pt());
+
+                     }
+
+		   
+		   bool PassDecayMode =false;
 		   for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau) 
 		     {
-		       bool PassDecayMode= false;
+		       //bool PassDecayMode= false;
 		       dRTauJet=reco::deltaR(*itau,*iJet);
 		       
 		       
@@ -457,6 +789,40 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			   ++NumCount;
 			   NumDMode->Fill(iJet->pt());
 			 }
+		       
+		       if(PassDecayMode)
+                         {
+                           if(TauMu)
+			     {
+			       NumdR->Fill(dRTauMu);
+			     }
+			   if(TauDecayMu)
+			     {
+			       NumdR->Fill(dRTauDecayMu);
+			     }
+			   if(DecayTauMu)
+			     {
+			       NumdR->Fill(dRDecayTauMu);
+			     }
+			   if (DecayTauDecayMu)
+			     {
+			       NumdR->Fill(dRDecayTauDecayMu);
+			     }
+			 }
+		       if(PassDecayMode)
+			 {
+			   if(TauFound)
+			     {
+			       NumVis->Fill((double)VisHad.Pt());
+			       
+			     }
+			   if(TauDecay)
+			     {
+			       NumVis->Fill((double)VisDecayHad.Pt());
+			       
+			     }
+			 }
+		       
 		       
 		       
 		       
@@ -502,20 +868,21 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			 }
 		       
 		       
-
-		       
 		     }
-		   
-		   
-		   
-		   
+		       
 		 }
+
+		   
+		   
+		   
+		   
+	 }
 	       
 	       //}
 	       
-	 }
-       
      }
+       
+   
    
    //TauEffDMode->TEfficiency(NumDMode,DenomDMode);
    
@@ -610,10 +977,14 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    //std::cout<< " denominator Iso: " <<  DenomCountIso  <<endl;
    //std::cout<< " Numerator Iso: " <<  NumCountIso <<endl;
 
-   std::cout<< " denominator DMode0: " <<  DenomCount<<std::endl;                                                                                                                                                                                                              std::cout<< " Numerator DMode0: " <<  NumCount0 <<std::endl;  
+   std::cout<< " denominator DMode0: " <<  DenomCount<<std::endl;
+   std::cout<< " Numerator DMode0: " <<  NumCount0 <<std::endl;  
    std::cout<< "************************"<<std::endl;
-
+   
    std::cout<< "TaumuTauhad: "<< Counter <<std::endl;
+   std::cout<< "TauHad_Count : "<< TauHad_Counter <<std::endl;
+   std::cout<< "TauDecay_Count : "<< TauDecay_Counter <<std::endl;
+
 }
 
 
