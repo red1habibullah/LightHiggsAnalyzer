@@ -79,16 +79,26 @@ class JetFakeTauEfficiency : public edm::one::EDAnalyzer<edm::one::SharedResourc
 
   TEfficiency* JetTauFake;
   //double dRTauJet=99999;
-  double dR_JetGenLepton=999999;
-  double dR_min=999999;
+  //double dR_JetGenLepton=999999;
+  double dRJetTauMatch=999999;
+  //double dR_min=999999;
 
   int NumCount=0;
   int DenomCount=0;
 
-  //int EleCount=0;
-  //int MuCount=0;
-  //int TauCount=0;
-  //int ZCount=0;
+  int NumDMCount=0;
+  int DenomDMCount=0;
+  TH1F* NumIn;
+  TH1F* DenomIn;
+
+
+  TH1F* NumDM;
+  TH1F* DenomDM;
+ 
+  TH1F* NumTau;
+  TH1F* DenomTau;
+  TH1D* TauPt;
+  int MuDecay=0;
   
 };
 
@@ -116,6 +126,17 @@ JetFakeTauEfficiency::JetFakeTauEfficiency(const edm::ParameterSet& iConfig):
    const int  nbins =5;
    double edges[nbins+1]={10,15,20,30,50,100};
    JetTauFake = f->make<TEfficiency>("JetTauFake","Jet Fake Tau Probability ;Pt(GeV);#epsilon",nbins,edges);
+   
+   NumIn = f->make<TH1F>("NumIn","Numerator for Jet Fake Tau Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
+   DenomIn = f->make<TH1F>("DenomIn","Denominator for Jet Fake Tau Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
+   
+   NumDM = f->make<TH1F>("NumDM","Numerator for Jet Fake Tau Efficiency;Tau Pt(GeV);# of Events",nbins,edges);
+   DenomDM = f->make<TH1F>("DenomDM","Denominator for Jet Fake Tau Efficiency;Tau Pt(GeV);# of Events",nbins,edges);
+   
+   NumTau = f->make<TH1F>("NumTau","Numerator for Jet Fake Tau Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
+   DenomTau = f->make<TH1F>("DenomTau","Denominator for Jet Fake Tau Efficiency;Tau Pt(GeV);# of Events",nbins,edges);
+   TauPt= f->make<TH1D>("TauPt","Tau Pt distribution;Pt(GeV);# of Events",100,0,100);
+
 
 }
 
@@ -144,7 +165,15 @@ JetFakeTauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   vector< const Candidate*> Fix;
   //int ZCount=0;
   //int ZDaughter=0;
+  double dR_JetGenLepton=999999;
   
+
+
+  int MuCount=0;                                                                                                                                                                                                                                                             
+  //int TauCount=0;
+  int ZCount=0;
+  
+
   Handle<pat::TauCollection> Taus;
   
   iEvent.getByToken(TauSrc_,Taus);
@@ -154,119 +183,63 @@ JetFakeTauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
   Handle<edm::View<reco::GenParticle> > pruned;
   iEvent.getByToken(prunedGenToken_, pruned);
-
+  bool MuFlag=false;
 
 
   for(size_t i=0; i<(pruned.product())->size() ;i++)
     {
       if(fabs((*pruned)[i].pdgId())==23)
 	{
-	  //++ZCount;
+	  ++ZCount;
 	  //cout<< "Start"<<endl;
 	
 	  const Candidate *Z = &(*pruned)[i];
 	  
 	  unsigned  n=Z->numberOfDaughters(); 
-
+	  cout<<"Status of Z :"<<Z->status()<<endl;
+	  
 	  for ( size_t j =0; j < n ; j++)
 	    {
 	      const Candidate * Daughter=Z->daughter(j);
 	      
-	      if((fabs(Daughter->pdgId())==11) || (fabs(Daughter->pdgId())==13) || (fabs(Daughter->pdgId())==15))
+
+	      if((fabs(Daughter->pdgId())==13)) 
+		{
+		  MuFlag=true;
+		  if(MuFlag)
+		    {
+		      ++MuDecay;
+		      cout<<"Muon Pt: "<< Daughter->pt() <<"  Daugter Status: "<< Daughter->status()<<endl;
+		    }
+		}
+	      if((fabs(Daughter->pdgId())==13) && (Daughter->status()==1) )
+		{
+		  ++MuCount;  
+		}
+	      //cout<<"/////// Filling vector for Z Daughter ///////" << endl;
+	      if( ((fabs(Daughter->pdgId())==11) || (fabs(Daughter->pdgId())==13) || (fabs(Daughter->pdgId())==15)))
 		{
 		
 		  Fix.push_back(Daughter);
+		  cout<<"pdgId:   "<<  Daughter->pdgId() << "Daughter Status:  "<<Daughter->status()<<endl;
 		}
-	      // if ((fabs(Daughter->pdgId())==11))
-	      // 	{
-	      // 	  //++EleCount;
-		  
-	      // 	  break;
-
-		
-	      // 	}
-	      // if ((fabs(Daughter->pdgId())==13))
-              //   {
-              //     //++MuCount;
-
-              //     break;
-
-
-              //   }
-	      // if ((fabs(Daughter->pdgId())==15))
-              //   {
-              //     //++TauCount;
-
-              //     break;
-
-
-              //   }
-
-	      // if ((fabs(Daughter->pdgId())==23))
-              //   {
-              //     //++ZDaughter;
-
-              //     break;
-
-
-              //   }
-	      // std::vector<pat::PackedGenParticle*>::iterator check;
-	    //   check=std::find(Packed.begin(),Packed.end(),const_cast<pat::PackedGenParticle*>((*packed).ptrAt(j).get()));
-	    //   if(check==Packed.end())
-	    // 	{
-	    // 	  Packed.push_back(const_cast<pat::PackedGenParticle*>((*packed).ptrAt(j).get()));
-	    // 	  invariant_v4_Tau_had +=TLorentzVector((*packed)[j].p4().X(),(*packed)[j].p4().Y(),(*packed)[j].p4().Z(),(*packed)[j].p4().T());
-
-
-	    //   if ((fabs(Daughter->pdgId())==13))  
-	    // 	{
-		
-	    // 	}
-
+	     
 	      
-	    
-	    // }
-	  
-	  // const Candidate *PseudoTau = &(*pruned)[i];
-	  // unsigned  n=PseudoTau->numberOfDaughters();
-
-	  // for ( size_t j =0; j < n ; j++)
-	  //   {
-	  //     const Candidate * Daughter=PseudoTau->daughter(j);
-	  //     if ((fabs(Daughter->pdgId())==11))
-	  // 	{
-	  // 	  EleFound=true;
-
-	  // 	  EleEta=(double)(Daughter->eta());
-	  // 	  ElePhi=(double)(Daughter->phi());
-
-
-		
 
 
 
 	    }
 
 	}
-  //cout<< " e lepton:  "<< EleCount <<endl;
-  //cout<< " mu lepton: "<< MuCount <<endl;
-  //cout<< " tau lepton: "<< TauCount <<endl;
-  //cout<< " Z Count  "<< ZCount<<endl;
-  //cout<< " Z Daughter Count  "<< ZDaughter<<endl;
-
 
     }
+  //cout<< " mu lepton: "<< MuCount <<endl; 
+ cout<< " Z Count  "<< ZCount<<endl;
+ //cout<< "Decay to Muon " <<MuDecay<<endl;
+ cout<< "vector size:"<< Fix.size() <<endl;
 
 
 
-
-
-
-
-  // for(unsigned int i=0;i<Fix.size();i++)
-  //   {
-  //     cout<< "pdgId:" << (Fix[i])->pdgId() << "Eta:   "<< (Fix[i])->eta()<<endl;
-  //   }
 
 
 
@@ -275,24 +248,20 @@ JetFakeTauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
     {
       
-      
-      for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
+      double dR_min=99999;
+     
 	
-	{
+ 
 	  bool JetKinematicCut= false;
-	  bool TauKinematicCut = false;
+    
 	  bool dRMatch= false;
-	  
 	  JetKinematicCut= ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
-	  TauKinematicCut=((itau->pt() > 10) && (fabs(itau->eta()) <2.3));
-	  
-	  //dRTauJet=reco::deltaR(*iJet,*itau);
-	  //dRMatch=(dRTauJet < 0.1);
 	  for(unsigned i=0;i<Fix.size();i++)
 	    {
-
-	      //Pt_event=(((PtElectrons[i]).p4()+(PtTaus[i]).p4()).pt());                                                                                                                                                                                                              
+  
 	      dR_JetGenLepton=reco::deltaR((Fix[i])->eta(),(Fix[i])->phi(),iJet->eta(),iJet->phi());
+	 
+	      
 	      if(dR_JetGenLepton < dR_min)
 		{
 
@@ -307,36 +276,126 @@ for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJet
 	  
 
 
+	  
+	  // cout<<"Minimum dR: "<<dR_min<<endl;
+	  dRMatch=(dR_min>0.4) && dR_min!=99999;
+	  
 
 
-	  dRMatch=(dR_min>0.4);
-
-
-	  if(JetKinematicCut && TauKinematicCut && dRMatch)
+	  if(JetKinematicCut && dRMatch)
 	    {
-	      bool PassMVA= false;
-	      ++DenomCount;
-	      PassMVA=((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")));
 	      
-	      if(PassMVA)
-		{
-		 
-		  ++NumCount;
-		}
-	      JetTauFake->Fill(PassMVA,itau->pt());
 
+
+
+
+
+	      
+
+
+
+
+	      bool PassMVAnDMode= false;
+	      ++DenomCount;
+	      DenomIn->Fill(iJet->pt());
+	       for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
+		 {
+		   //TauPt->Fill(itau->pt());
+		   dRJetTauMatch=reco::deltaR(*iJet,*itau);
+		   //bool Denom=false;
+		   
+		   PassMVAnDMode=((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")) && (itau->tauID("decayModeFinding")) && (dRJetTauMatch < 0.1));
+		   
+		   if(PassMVAnDMode)
+		     {
+		       
+		       ++NumCount;
+		       NumIn->Fill(iJet->pt());
+		     }
+		   
+		   JetTauFake->Fill(PassMVAnDMode,iJet->pt());
+		  
+
+
+
+
+
+
+
+
+		   
+		   bool Denom=false;
+		   ////////////////////////////////DecayMode in Denomintor/////////////////////////
+		   Denom=(dRJetTauMatch < 0.1) && (itau->tauID("decayModeFinding")) ;
+		   
+		   if(Denom)
+		     {
+		       ++DenomDMCount;
+		       DenomDM->Fill(itau->pt());
+		       
+		       bool Num=false;
+		       Num=(itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT"));
+		       if(Num)
+			 {
+			   NumDM->Fill(itau->pt());
+			   ++NumDMCount;
+			 }
+
+
+		     }
+
+		 }
+	    
+
+
+
+
+
+	    
+	    
 	    }
 	  
 	  
 	  
-	}
-      
-      
+	  //}
+	  
+	  
     }
 
 
- cout<<" Numerator: " << NumCount<<endl;
- cout<<" Denominator: " << DenomCount<<endl;
+ for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
+   {
+     TauPt->Fill(itau->pt());
+     bool TauKinematicCut=false;
+     TauKinematicCut= ((itau->pt() > 10) && (fabs(itau->eta()) <2.3));
+     
+     bool DenomCond=false;
+     DenomCond=(itau->tauID("decayModeFinding")) && TauKinematicCut;
+
+     if(DenomCond)
+       {
+	 DenomTau->Fill(itau->pt());
+
+	 bool NumCond=false; 
+	 NumCond= (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")) && (itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5);
+	 
+	 if (NumCond)
+	   {
+	     NumTau->Fill(itau->pt());
+	   }
+
+
+       }
+
+   }
+ 
+ 
+ 
+	  //cout<<" Numerator: " << NumCount<<endl;
+	  //cout<<" Denominator: " << DenomCount<<endl;
+ 
+ //cout<<" Numerator DM: " << NumDMCount<<endl;
+ //cout<<" Denominator DM: " << DenomDMCount<<endl;
 
 
 }
