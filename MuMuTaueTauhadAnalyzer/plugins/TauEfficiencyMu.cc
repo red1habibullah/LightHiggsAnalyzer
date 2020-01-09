@@ -109,6 +109,12 @@ private:
   TH1D *NumTotalVis;
   TH1D *DenomTotalVis;
 
+  //TH1D* NumIsodR;
+  //TH1D* DenomIsodR;
+
+  TH1D *NumIsoVis;
+  TH1D *DenomIsoVis;
+
   
   TEfficiency* TauEffDMode;
   
@@ -205,7 +211,13 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    NumTotalVis = f->make<TH1D>("NumTotalVis","Numerator for Total Reconstruction Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomTotalVis = f->make<TH1D>("DenomTotalVis","Denominator for Total Reconstruction Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
 
-   
+   //NumIsodR = f->make<TH1D>("NumIsodR","Numerator for Isolation Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
+   //DenomIsodR = f->make<TH1D>("DenomIsodR","Denominator for Isolation Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
+
+   NumIsoVis = f->make<TH1D>("NumIsoVis","Numerator for Isolation Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
+   DenomIsoVis = f->make<TH1D>("DenomIsoVis","Denominator for Isolation Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
+
+
    TauEffDMode = f->make<TEfficiency>("TauEffDMode","Tau DecayMode  Efficiency;Jet Pt(GeV);#epsilon",nbins,edges);
    
    
@@ -834,22 +846,22 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			   NumDMode->Fill(iJet->pt());
 			 }
 		       
-		       if(TauMu)
-			 {
-			   DenomdR->Fill(dRTauMu);
-			 }
-		       if(TauDecayMu)
-			 {
-			   DenomdR->Fill(dRTauDecayMu);
-			 }
-		       if(DecayTauMu)
-			 {
-			   DenomdR->Fill(dRDecayTauMu);
-			 }
-		       if (DecayTauDecayMu)
-			 {
-			   DenomdR->Fill(dRDecayTauDecayMu);
-			 }
+		       // if(TauMu)
+		       // 	 {
+		       // 	   DenomdR->Fill(dRTauMu);
+		       // 	 }
+		       // if(TauDecayMu)
+		       // 	 {
+		       // 	   DenomdR->Fill(dRTauDecayMu);
+		       // 	 }
+		       // if(DecayTauMu)
+		       // 	 {
+		       // 	   DenomdR->Fill(dRDecayTauMu);
+		       // 	 }
+		       // if (DecayTauDecayMu)
+		       // 	 {
+		       // 	   DenomdR->Fill(dRDecayTauDecayMu);
+		       // 	 }
 
 		       if(PassDecayMode)
                          {
@@ -1038,9 +1050,31 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	   ++DenomCountIso;
 	   PassMVA=((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")));
 	   
+	   if(TauFound)
+	     {
+	       DenomIsoVis->Fill((double)VisHad.Pt());
+
+	     }
+	   if(TauDecay)
+	     {
+	       DenomIsoVis->Fill((double)VisDecayHad.Pt());
+
+	     }
+
 	   if(PassMVA)
 	     {
 	       ++NumCountIso;
+	       if(TauFound)
+		 {
+		   NumIsoVis->Fill((double)VisHad.Pt());
+
+		 }
+	       if(TauDecay)
+		 {
+		   NumIsoVis->Fill((double)VisDecayHad.Pt());
+
+		 }
+
 	     }
 	   TauEff->Fill(PassMVA,itau->pt());
 	 }
