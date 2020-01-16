@@ -63,8 +63,9 @@ class JetFakeTauEfficiency : public edm::one::EDAnalyzer<edm::one::SharedResourc
    public:
       explicit JetFakeTauEfficiency(const edm::ParameterSet&);
       ~JetFakeTauEfficiency();
+  std::vector<const reco::Candidate*>FindStat1( const reco::Candidate * particle);
 
-      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 
    private:
@@ -77,17 +78,18 @@ class JetFakeTauEfficiency : public edm::one::EDAnalyzer<edm::one::SharedResourc
   edm::EDGetTokenT<reco::PFJetCollection> jetSrc_;
   edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenToken_;
 
-  TEfficiency* JetTauFake;
-  //double dRTauJet=99999;
-  //double dR_JetGenLepton=999999;
+  TEfficiency* JetTauFake;;
   double dRJetTauMatch=999999;
-  //double dR_min=999999;
-
   int NumCount=0;
   int DenomCount=0;
 
   int NumDMCount=0;
   int DenomDMCount=0;
+  
+  int NumTauCount=0;
+  int DenomTauCount=0;
+
+
   TH1F* NumIn;
   TH1F* DenomIn;
 
@@ -98,7 +100,7 @@ class JetFakeTauEfficiency : public edm::one::EDAnalyzer<edm::one::SharedResourc
   TH1F* NumTau;
   TH1F* DenomTau;
   TH1D* TauPt;
-  int MuDecay=0;
+  //int MuDecay=0;
   
 };
 
@@ -127,8 +129,8 @@ JetFakeTauEfficiency::JetFakeTauEfficiency(const edm::ParameterSet& iConfig):
    double edges[nbins+1]={10,15,20,30,50,100};
    JetTauFake = f->make<TEfficiency>("JetTauFake","Jet Fake Tau Probability ;Pt(GeV);#epsilon",nbins,edges);
    
-   NumIn = f->make<TH1F>("NumIn","Numerator for Jet Fake Tau Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
-   DenomIn = f->make<TH1F>("DenomIn","Denominator for Jet Fake Tau Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
+   NumIn = f->make<TH1F>("NumIn","Numerator for Jet Fake Tau Efficiency;Jet Pt(GeV);# of Events",30,0,300);
+   DenomIn = f->make<TH1F>("DenomIn","Denominator for Jet Fake Tau Efficiency;Jet Pt(GeV);# of Events",30,0,300);
    
    NumDM = f->make<TH1F>("NumDM","Numerator for Jet Fake Tau Efficiency;Tau Pt(GeV);# of Events",nbins,edges);
    DenomDM = f->make<TH1F>("DenomDM","Denominator for Jet Fake Tau Efficiency;Tau Pt(GeV);# of Events",nbins,edges);
@@ -149,6 +151,54 @@ JetFakeTauEfficiency::~JetFakeTauEfficiency()
 
 }
 
+std::vector<const reco::Candidate*>JetFakeTauEfficiency::FindStat1( const reco::Candidate * particle)
+{
+
+  std::vector<const reco::Candidate*> visParticles;
+  if (particle->status() == 1)
+    {
+      visParticles.push_back(particle);
+    }
+  else
+    {
+
+      int nDaughters= particle->numberOfDaughters();
+      for (int i=0; i < nDaughters; i++)
+        {
+          const reco::Candidate* Daughter= particle->daughter(i);
+	  // std::cout<< "Daughter no:  "<< i << "  pdgId: " << Daughter->pdgId() <<" Daughter Pt: " << Daughter->pt()<<" Daughter Status: " << Daughter->status()<<std::endl;
+
+          if(Daughter->status() == 1)
+            {
+              visParticles.push_back(Daughter);
+
+
+            }
+          else
+            {
+              auto auxVisParticles = FindStat1(Daughter);
+              visParticles.insert(visParticles.end(), auxVisParticles.begin(), auxVisParticles.end());
+            }
+        }
+    }
+  return visParticles;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //
 // member functions
@@ -163,15 +213,8 @@ JetFakeTauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   using namespace reco;
 
   vector< const Candidate*> Fix;
-  //int ZCount=0;
-  //int ZDaughter=0;
   double dR_JetGenLepton=999999;
-  
-
-
-  int MuCount=0;                                                                                                                                                                                                                                                             
-  //int TauCount=0;
-  int ZCount=0;
+  double dR_TauGenLepton=999999;
   
 
   Handle<pat::TauCollection> Taus;
@@ -183,126 +226,92 @@ JetFakeTauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
   Handle<edm::View<reco::GenParticle> > pruned;
   iEvent.getByToken(prunedGenToken_, pruned);
-  bool MuFlag=false;
-
-
+     
   for(size_t i=0; i<(pruned.product())->size() ;i++)
     {
-      if(fabs((*pruned)[i].pdgId())==23)
-	{
-	  ++ZCount;
-	  //cout<< "Start"<<endl;
-	
-	  const Candidate *Z = &(*pruned)[i];
+      std::vector <const reco::Candidate*> daughters;
+      daughters.clear();
+      
+      
+      if(fabs((*pruned)[i].pdgId())==13 && ((*pruned)[i].isHardProcess()))
+        {
+          const Candidate *Muon = &(*pruned)[i];
+          //cout<<" Muon Pt: "<< Muon->pt() <<" Muon Status: "<< Muon->status() <<endl;
 	  
-	  unsigned  n=Z->numberOfDaughters(); 
-	  cout<<"Status of Z :"<<Z->status()<<endl;
+          if((Muon->status()==1) && fabs(Muon->mother()->pdgId())==23)
+            {
+              //cout<<" Final Muon pt: "<< Muon->pt() <<" Muon Status: "<< Muon->status() << " Muon Mother pdgId: " << Muon->mother()->0	pdgId() <<endl;
+              Fix.push_back(Muon);
+	      
+            }
+	  else
+            {
+              //cout<<" We have a Muon of status: " << Muon->status() << " With a mother of pdgId: " << Muon->mother()->pdgId() << " And status: " << Muon->mother()->status()<<endl;
+              daughters=FindStat1(Muon);
+              for (unsigned int jDau = 0; jDau < daughters.size(); jDau++)
+                {
+                  //cout<<" Recursive daughter pdgId :  " <<  daughters[jDau]->pdgId() << "  Recursive daughter Status: "<< daughters[jDau]->status()  <<" Recursive daughter Pt:"<< daughters[jDau]->pt()<<endl;
+                  if(fabs(daughters[jDau]->pdgId())==13)
+                    {
+                      Fix.push_back(daughters[jDau]);
+                    }
+                }
+	      
+	      
+	      
+            }
 	  
-	  for ( size_t j =0; j < n ; j++)
-	    {
-	      const Candidate * Daughter=Z->daughter(j);
-	      
-
-	      if((fabs(Daughter->pdgId())==13)) 
-		{
-		  MuFlag=true;
-		  if(MuFlag)
-		    {
-		      ++MuDecay;
-		      cout<<"Muon Pt: "<< Daughter->pt() <<"  Daugter Status: "<< Daughter->status()<<endl;
-		    }
-		}
-	      if((fabs(Daughter->pdgId())==13) && (Daughter->status()==1) )
-		{
-		  ++MuCount;  
-		}
-	      //cout<<"/////// Filling vector for Z Daughter ///////" << endl;
-	      if( ((fabs(Daughter->pdgId())==11) || (fabs(Daughter->pdgId())==13) || (fabs(Daughter->pdgId())==15)))
-		{
-		
-		  Fix.push_back(Daughter);
-		  cout<<"pdgId:   "<<  Daughter->pdgId() << "Daughter Status:  "<<Daughter->status()<<endl;
-		}
-	     
-	      
-
-
-
-	    }
-
-	}
-
+        }
     }
-  //cout<< " mu lepton: "<< MuCount <<endl; 
- cout<< " Z Count  "<< ZCount<<endl;
- //cout<< "Decay to Muon " <<MuDecay<<endl;
- cout<< "vector size:"<< Fix.size() <<endl;
+  cout<< "vector size:"<< Fix.size() <<endl;
+  
+  
+  
+  
 
 
+  
 
-
-
-
-
-
-for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
+  for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
     {
       
       double dR_min=99999;
-     
-	
- 
-	  bool JetKinematicCut= false;
-    
-	  bool dRMatch= false;
-	  JetKinematicCut= ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
-	  for(unsigned i=0;i<Fix.size();i++)
+      bool JetKinematicCut= false;
+      bool dRMatch= false;
+      
+
+
+
+      JetKinematicCut= ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
+      
+      for(unsigned i=0;i<Fix.size();i++)
+	{
+	  
+	  dR_JetGenLepton=reco::deltaR((Fix[i])->eta(),(Fix[i])->phi(),iJet->eta(),iJet->phi());
+	  
+	  
+	  if(dR_JetGenLepton < dR_min)
 	    {
-  
-	      dR_JetGenLepton=reco::deltaR((Fix[i])->eta(),(Fix[i])->phi(),iJet->eta(),iJet->phi());
-	 
 	      
-	      if(dR_JetGenLepton < dR_min)
-		{
-
-		  dR_min=dR_JetGenLepton;
-
-		  //dR_ele=i;
-		  //dR_tau=i;
-		}
-
-
+	      dR_min=dR_JetGenLepton;
 	    }
 	  
-
-
 	  
-	  // cout<<"Minimum dR: "<<dR_min<<endl;
-	  dRMatch=(dR_min>0.4) && dR_min!=99999;
-	  
+	}
+      dRMatch=(dR_min>0.4);
+      
 
-
-	  if(JetKinematicCut && dRMatch)
-	    {
-	      
-
-
-
-
-
-	      
-
-
-
-
-	      bool PassMVAnDMode= false;
-	      ++DenomCount;
-	      DenomIn->Fill(iJet->pt());
+      
+      if(JetKinematicCut && dRMatch)
+	{
+	  /////////////?DecayMode Not in Denominator
+	  bool PassMVAnDMode= false;
+	  ++DenomCount;
+	  DenomIn->Fill(iJet->pt());
 	       for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
 		 {
-		   //TauPt->Fill(itau->pt());
+		   
 		   dRJetTauMatch=reco::deltaR(*iJet,*itau);
-		   //bool Denom=false;
 		   
 		   PassMVAnDMode=((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")) && (itau->tauID("decayModeFinding")) && (dRJetTauMatch < 0.1));
 		   
@@ -314,16 +323,6 @@ for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJet
 		     }
 		   
 		   JetTauFake->Fill(PassMVAnDMode,iJet->pt());
-		  
-
-
-
-
-
-
-
-
-		   
 		   bool Denom=false;
 		   ////////////////////////////////DecayMode in Denomintor/////////////////////////
 		   Denom=(dRJetTauMatch < 0.1) && (itau->tauID("decayModeFinding")) ;
@@ -340,63 +339,121 @@ for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJet
 			   NumDM->Fill(itau->pt());
 			   ++NumDMCount;
 			 }
-
-
+		       
+		       
 		     }
-
+		   
 		 }
+	       
+	       
+	       
+	       
+	       
+	       
+	       
 	    
-
-
-
-
-
-	    
-	    
-	    }
+	}
 	  
 	  
 	  
-	  //}
+   
 	  
 	  
     }
 
 
- for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
+ 
+
+
+
+
+
+
+
+
+
+
+for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
    {
      TauPt->Fill(itau->pt());
-     bool TauKinematicCut=false;
-     TauKinematicCut= ((itau->pt() > 10) && (fabs(itau->eta()) <2.3));
      
-     bool DenomCond=false;
-     DenomCond=(itau->tauID("decayModeFinding")) && TauKinematicCut;
 
-     if(DenomCond)
+
+     double dR_min_Tau=99999;
+     bool dRMatchTau=false;
+     bool TauKinematicCut=false;
+     
+
+
+
+
+    
+     
+     
+    
+
+
+     for(unsigned i=0;i<Fix.size();i++)
        {
-	 DenomTau->Fill(itau->pt());
 
-	 bool NumCond=false; 
-	 NumCond= (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")) && (itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5);
+	 dR_TauGenLepton=reco::deltaR((Fix[i])->eta(),(Fix[i])->phi(),itau->eta(),itau->phi());
 	 
-	 if (NumCond)
+	 
+	 if(dR_TauGenLepton < dR_min_Tau)
 	   {
-	     NumTau->Fill(itau->pt());
+
+	     dR_min_Tau=dR_TauGenLepton;
 	   }
 
 
        }
 
-   }
- 
- 
- 
-	  //cout<<" Numerator: " << NumCount<<endl;
-	  //cout<<" Denominator: " << DenomCount<<endl;
- 
- //cout<<" Numerator DM: " << NumDMCount<<endl;
- //cout<<" Denominator DM: " << DenomDMCount<<endl;
+     dRMatchTau=(dR_min_Tau>0.4);
+     cout<<" dR_min_Tau: " << dR_min_Tau <<endl;
+     
 
+
+     TauKinematicCut= ((itau->pt() > 10) && (fabs(itau->eta()) <2.3));
+     
+     
+     
+
+     if(TauKinematicCut && dRMatchTau)
+       {
+
+	 
+	 bool DenomCond=false;
+	 DenomCond=(itau->tauID("decayModeFinding"));
+	 
+	 if(DenomCond)
+	   {
+	     
+	     ++DenomTauCount;
+	     DenomTau->Fill(itau->pt());
+
+	     bool NumCond=false; 
+	     NumCond= (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")) && (itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5);
+	 
+	     if (NumCond)
+	       {
+		 ++NumTauCount;
+		 NumTau->Fill(itau->pt());
+	       }
+	     
+	     
+	   }
+	 
+	 
+       }
+     
+     
+}
+ 
+ 
+ 
+
+ cout<<" Numerator Tau: " << NumTauCount<<endl;
+ cout<<" Denominator Tau: " << DenomTauCount<<endl;  
 
 }
 
