@@ -196,7 +196,6 @@ DiMuonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  TrailingPt->SetFillColor(kBlue);
 	  TrailingPt->GetXaxis()->SetTitle("Pt(GeV)");
 	  TrailingPt->GetYaxis()->SetTitle("# of events");
-
 	  //std::cout<< " Trailing Pt:  " << imu->pt() <<endl;
 	  InvMassPair=abs((iMu->p4()+imu->p4()).mass());
 	  InvMass->Fill(InvMassPair);
