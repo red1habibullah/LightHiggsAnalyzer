@@ -324,6 +324,7 @@ DiMuonFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
    bool Loose=0;
+   //bool Medium=0;
    const reco::Vertex& pv=*Vertex->begin();
    Point p;
    p=pv.position();
@@ -334,9 +335,11 @@ DiMuonFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
    for(pat::MuonCollection::const_iterator iMuon = Muons->begin() ; iMuon !=Muons->end();++iMuon,++iMuon_Id)
      {
        Loose=muon::isLooseMuon(*iMuon);
+       // Medium=reco::Muon::CutBasedIdMedium;
+       //Medium=muon::isMediumMuon(*iMuon);
        reco::MuonPFIsolation iso = iMuon->pfIsolationR04();
        reliso = (iso.sumChargedHadronPt+TMath::Max(0.,iso.sumNeutralHadronEt+iso.sumPhotonEt-0.5*iso.sumPUPt))/iMuon->pt();
-       if(Loose && (fabs(iMuon->eta()) < 2.4) && (fabs(iMuon->innerTrack()->dxy(p)) < 0.2) && fabs(iMuon->innerTrack()->dz(p)) < 0.5 && ((iMuon->pt())>3) && reliso < 0.25 )
+       if( Loose /*Medium*/ && (fabs(iMuon->eta()) < 2.4) && (fabs(iMuon->innerTrack()->dxy(p)) < 0.2) && fabs(iMuon->innerTrack()->dz(p)) < 0.5 && ((iMuon->pt())>3) && reliso < 0.25 )
 	 { 
 	   ++MuonCount;
 	   SelectedMuons.push_back(*iMuon);

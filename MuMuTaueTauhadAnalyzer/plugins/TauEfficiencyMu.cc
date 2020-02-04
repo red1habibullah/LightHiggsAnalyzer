@@ -103,6 +103,9 @@ private:
   TH1D *NumVis;
   TH1D *DenomVis;
   
+  TH1D *NumLep;
+  TH1D* DenomLep;
+
   TH1D* NumTotaldR;
   TH1D* DenomTotaldR;
   
@@ -202,6 +205,9 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    DenomdR = f->make<TH1D>("DenomdR","Denominator for Reconstruction Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
    
    
+   NumLep = f->make<TH1D>("NumLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edges);
+   DenomLep = f->make<TH1D>("DenomLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edges);
+
    NumVis = f->make<TH1D>("NumVis","Numerator for Reconstruction Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomVis = f->make<TH1D>("DenomVis","Denominator for Reconstruction Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
    
@@ -420,6 +426,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    
    double MuPhi=99999;
    double MuEta=99999;
+   double MuPt=99999;
 
    double MuDecayEta=99999;
    double MuDecayPhi=99999;
@@ -559,7 +566,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		       
                        MuEta=(double)(Daughter->eta());
 		       MuPhi=(double)(Daughter->phi());
-
+		       MuPt=(double)(Daughter->pt());
 
                      }
       		   ///---------------------------viz Tau_had--------------------------------------------------------------------------
@@ -828,6 +835,18 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		       DenomTotalVis->Fill((double)VisDecayHad.Pt());
 
                      }
+		   if(MuFound)
+                     {
+                       DenomLep->Fill(MuPt);
+
+                     }
+                   if(MuDecay)
+                     {
+                       DenomLep->Fill((double)VisDecayMuon.Pt());
+
+                     }
+
+
 
 		   bool PassDecayMode =false;
 		   bool PassDecayModePassMVA=false;
@@ -930,7 +949,19 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                                NumTotalVis->Fill((double)VisDecayHad.Pt());
 
                              }
+			   if(MuFound)
+			     {
+			       NumLep->Fill(MuPt);
 
+			     }
+			   if(MuDecay)
+			     {
+			       NumLep->Fill((double)VisDecayMuon.Pt());
+
+			     }
+
+
+			 
 			 }
 		       
 		       TauEffDMode->Fill(PassDecayMode,itau->pt());
