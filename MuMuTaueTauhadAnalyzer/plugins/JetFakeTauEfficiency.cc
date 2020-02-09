@@ -263,7 +263,7 @@ JetFakeTauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	  
         }
     }
-  cout<< "vector size:"<< Fix.size() <<endl;
+  //cout<< "vector size:"<< Fix.size() <<endl;
   
   
   
@@ -409,7 +409,7 @@ for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end()
        }
 
      dRMatchTau=(dR_min_Tau>0.4);
-     cout<<" dR_min_Tau: " << dR_min_Tau <<endl;
+     //cout<<" dR_min_Tau: " << dR_min_Tau <<endl;
      
 
 
@@ -452,8 +452,8 @@ for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end()
  
  
 
- cout<<" Numerator Tau: " << NumTauCount<<endl;
- cout<<" Denominator Tau: " << DenomTauCount<<endl;  
+//cout<<" Numerator Tau: " << NumTauCount<<endl;
+//cout<<" Denominator Tau: " << DenomTauCount<<endl;  
 
 }
 
