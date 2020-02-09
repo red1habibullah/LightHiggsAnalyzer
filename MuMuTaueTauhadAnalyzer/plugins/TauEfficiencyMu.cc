@@ -99,12 +99,19 @@ private:
   
   TH1D* NumdR;
   TH1D* DenomdR;
+  
+  TH1D* NumIsodR;
+  TH1D* DenomIsodR;
+
 
   TH1D *NumVis;
   TH1D *DenomVis;
   
-  TH1D *NumLep;
-  TH1D* DenomLep;
+  TH1D *NumTotalLep;
+  TH1D *DenomTotalLep;
+  
+  TH1D *NumIsoLep;
+  TH1D *DenomIsoLep;
 
   TH1D* NumTotaldR;
   TH1D* DenomTotaldR;
@@ -117,7 +124,10 @@ private:
 
   TH1D *NumIsoVis;
   TH1D *DenomIsoVis;
-
+  
+  TH2D *NumdRLep;
+  TH2D *DenomdRLep;
+  
   
   TEfficiency* TauEffDMode;
   
@@ -201,18 +211,25 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    NumDMode = f->make<TH1F>("NumDMode","Numerator for Reconstruction Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
    DenomDMode = f->make<TH1F>("DenomDMode","Denominator for Reconstruction Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
   
-   NumdR = f->make<TH1D>("NumdR","Numerator for Reconstruction Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
-   DenomdR = f->make<TH1D>("DenomdR","Denominator for Reconstruction Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
+   NumdR = f->make<TH1D>("NumdR","Numerator for Reconstruction Efficiency;dR(#tau_{had},#tau_{#mu});# of Events",10,0,1);
+   DenomdR = f->make<TH1D>("DenomdR","Denominator for Reconstruction Efficiency;dR(#tau_{had},#tau_{#mu});# of Events",10,0,1);
    
+   NumIsodR = f->make<TH1D>("NumIsodR","Numerator for Isolation Efficiency;dR(#tau_{had},#tau_{#mu});# of Events",10,0,1);
+   DenomIsodR = f->make<TH1D>("DenomIsodR","Denominator for Isolation Efficiency;dR(#tau_{had},#tau_{#mu});# of Events",10,0,1);
    
-   NumLep = f->make<TH1D>("NumLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edges);
-   DenomLep = f->make<TH1D>("DenomLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edges);
+   NumTotalLep = f->make<TH1D>("NumTotalLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edges);
+   DenomTotalLep = f->make<TH1D>("DenomTotalLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edges);
+   
+   NumIsoLep = f->make<TH1D>("NumIsoLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edges);
+   DenomIsoLep = f->make<TH1D>("DenomIsoLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edges);
 
+   
+   
    NumVis = f->make<TH1D>("NumVis","Numerator for Reconstruction Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomVis = f->make<TH1D>("DenomVis","Denominator for Reconstruction Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
    
-   NumTotaldR = f->make<TH1D>("NumTotaldR","Numerator for Total Reconstruction Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
-   DenomTotaldR = f->make<TH1D>("DenomTotaldR","Denominator for Total Reconstruction Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
+   NumTotaldR = f->make<TH1D>("NumTotaldR","Numerator for Total Reconstruction Efficiency;dR(#tau_{had},#tau_{#mu});# of Events",10,0,1);
+   DenomTotaldR = f->make<TH1D>("DenomTotaldR","Denominator for Total Reconstruction Efficiency;dR(#tau_{had},#tau_{#mu});# of Events",10,0,1);
 
    NumTotalVis = f->make<TH1D>("NumTotalVis","Numerator for Total Reconstruction Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomTotalVis = f->make<TH1D>("DenomTotalVis","Denominator for Total Reconstruction Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
@@ -223,7 +240,11 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    NumIsoVis = f->make<TH1D>("NumIsoVis","Numerator for Isolation Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomIsoVis = f->make<TH1D>("DenomIsoVis","Denominator for Isolation Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
 
+   NumdRLep= f->make<TH2D>("NumdRLep","#tau_{#mu} Pt (GeV) vs dR(#tau_{had},#tau_{#mu});dR(#tau_{had},#tau_{#mu});#tau_{#mu} Pt (GeV)",10,0,1,nbins,edges);
+   DenomdRLep= f->make<TH2D>("DenomdRLep","#tau_{#mu} Pt (GeV) vs dR(#tau_{had}),#tau_{#mu};dR(#tau_{had},#tau_{#mu});#tau_{#mu} Pt (GeV)",10,0,1,nbins,edges);
 
+   
+   
    TauEffDMode = f->make<TEfficiency>("TauEffDMode","Tau DecayMode  Efficiency;Jet Pt(GeV);#epsilon",nbins,edges);
    
    
@@ -248,6 +269,13 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    
    TauPt= f->make<TH1D>("TauPt","Tau Pt distribution;Pt(GeV);# of Events",100,0,100);
    JetPt= f->make<TH1D>("JetPt","Jet Pt distribution;Pt(GeV);# of Events",200,0,200);
+
+   
+
+   
+
+
+
 
 
    
@@ -825,6 +853,54 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                      {
                        DenomTotaldR->Fill(dRDecayTauDecayMu);
                      }
+		   
+		   if(TauMu)
+                     {
+                       DenomIsodR->Fill(dRTauMu);
+                     }
+                   if(TauDecayMu)
+                     {
+                       DenomIsodR->Fill(dRTauDecayMu);
+                     }
+                   if(DecayTauMu)
+                     {
+                       DenomIsodR->Fill(dRDecayTauMu);
+                     }
+                   if (DecayTauDecayMu)
+                     {
+                       DenomIsodR->Fill(dRDecayTauDecayMu);
+                     }
+
+		   if(TauMu)
+                     {
+                       DenomdRLep->Fill(dRTauMu,MuPt);
+		       DenomdRLep->SetDrawOption("COLZ");
+		     }
+                   if(TauDecayMu)
+                     {
+                       DenomdRLep->Fill(dRTauDecayMu,(double)VisDecayMuon.Pt());
+                       DenomdRLep->SetDrawOption("COLZ");
+
+		     }
+                   if(DecayTauMu)
+                     {
+                       DenomdRLep->Fill(dRDecayTauMu,MuPt);
+		       DenomdRLep->SetDrawOption("COLZ");
+
+                     }
+                   if (DecayTauDecayMu)
+                     {
+                       DenomdRLep->Fill(dRDecayTauDecayMu,(double)VisDecayMuon.Pt());
+		       DenomdRLep->SetDrawOption("COLZ"); 
+		     }
+		   
+
+
+
+
+
+
+		   
 		   if(TauFound)
                      {
                        DenomTotalVis->Fill((double)VisHad.Pt());
@@ -835,21 +911,34 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		       DenomTotalVis->Fill((double)VisDecayHad.Pt());
 
                      }
+		   
 		   if(MuFound)
                      {
-                       DenomLep->Fill(MuPt);
+                       DenomTotalLep->Fill(MuPt);
 
                      }
                    if(MuDecay)
                      {
-                       DenomLep->Fill((double)VisDecayMuon.Pt());
+                       DenomTotalLep->Fill((double)VisDecayMuon.Pt());
 
                      }
+		   if(MuFound)
+                     {
+                       DenomIsoLep->Fill(MuPt);
+
+                     }
+                   if(MuDecay)
+                     {
+                       DenomIsoLep->Fill((double)VisDecayMuon.Pt());
+
+                     }
+
 
 
 
 		   bool PassDecayMode =false;
 		   bool PassDecayModePassMVA=false;
+		   bool PassMVA=false;
 
 		   for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau) 
 		     {
@@ -859,6 +948,8 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		       
 		       PassDecayMode=(itau->tauID("decayModeFinding")) && (dRTauJet< 0.1);
 		       PassDecayModePassMVA=(itau->tauID("decayModeFinding")) && (dRTauJet< 0.1) && ((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")));
+		       PassMVA= (dRTauJet< 0.1) && ((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")));
+
 		       if(PassDecayMode)
 			 {
 			   ++NumCount;
@@ -900,6 +991,49 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			     {
 			       NumdR->Fill(dRDecayTauDecayMu);
 			     }
+			 }
+
+
+
+		       if(PassMVA)
+			 {
+			 
+			   if(TauMu)
+			     {
+			       NumIsodR->Fill(dRTauMu);
+			     }
+			   if(TauDecayMu)
+			     {
+			       NumIsodR->Fill(dRTauDecayMu);
+			     }
+			   if(DecayTauMu)
+			     {
+			       NumIsodR->Fill(dRDecayTauMu);
+			     }
+			   if (DecayTauDecayMu)
+			     {
+			       NumIsodR->Fill(dRDecayTauDecayMu);
+			     }
+			 
+			   if(MuFound)
+			     {
+			       NumIsoLep->Fill(MuPt);
+
+			     }
+			   if(MuDecay)
+			     {
+			       NumIsoLep->Fill((double)VisDecayMuon.Pt());
+
+			     }
+
+			 
+			 
+			 
+			 
+			 
+			 
+			 
+			 
 			 }
 		       if(PassDecayMode)
 			 {
@@ -951,16 +1085,46 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                              }
 			   if(MuFound)
 			     {
-			       NumLep->Fill(MuPt);
+			       NumTotalLep->Fill(MuPt);
 
 			     }
 			   if(MuDecay)
 			     {
-			       NumLep->Fill((double)VisDecayMuon.Pt());
+			       NumTotalLep->Fill((double)VisDecayMuon.Pt());
 
 			     }
+			   
+			   if(TauMu)
+			     {
+			       NumdRLep->Fill(dRTauMu,MuPt);
+			       NumdRLep->SetDrawOption("COLZ"); 
+			     }
+			   if(TauDecayMu)
+			     {
+			       NumdRLep->Fill(dRTauDecayMu,(double)VisDecayMuon.Pt());
+			       NumdRLep->SetDrawOption("COLZ");
+			     }
+			   if(DecayTauMu)
+			     {
+			       NumdRLep->Fill(dRDecayTauMu,MuPt);
+			       NumdRLep->SetDrawOption("COLZ");
+			     }
+			   if (DecayTauDecayMu)
+			     {
+			       NumdRLep->Fill(dRDecayTauDecayMu,(double)VisDecayMuon.Pt());
+			       NumdRLep->SetDrawOption("COLZ"); 
+			     }
+			   //NumdRLep->SetDrawOption("COLZ");
 
-
+			   
+			   
+			 
+			 
+			 
+			 
+			 
+			 
+			 
 			 
 			 }
 		       

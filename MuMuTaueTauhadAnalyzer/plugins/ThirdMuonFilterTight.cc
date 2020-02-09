@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    LightHiggsAnalyzer/MuMuTaueTauhadAnalyzer
-// Class:      ThirdMuonFilter
+// Class:      ThirdMuonFilterTight
 // 
-/**\class ThirdMuonFilter ThirdMuonFilter.cc LightHiggsAnalyzer/MuMuTaueTauhadAnalyzer/plugins/ThirdMuonFilter.cc
+/**\class ThirdMuonFilterTight ThirdMuonFilterTight.cc LightHiggsAnalyzer/MuMuTaueTauhadAnalyzer/plugins/ThirdMuonFilterTight.cc
 
  Description: [one line class summary]
 
@@ -42,10 +42,10 @@
 // class declaration
 //
 
-class ThirdMuonFilter : public edm::stream::EDFilter<> {
+class ThirdMuonFilterTight : public edm::stream::EDFilter<> {
    public:
-      explicit ThirdMuonFilter(const edm::ParameterSet&);
-      ~ThirdMuonFilter();
+      explicit ThirdMuonFilterTight(const edm::ParameterSet&);
+      ~ThirdMuonFilterTight();
 
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -76,7 +76,7 @@ class ThirdMuonFilter : public edm::stream::EDFilter<> {
 //
 // constructors and destructor
 //
-ThirdMuonFilter::ThirdMuonFilter(const edm::ParameterSet& iConfig):
+ThirdMuonFilterTight::ThirdMuonFilterTight(const edm::ParameterSet& iConfig):
   muonSrc_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonSrc"))),
   MuonL_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("Muons1"))),
   MuonT_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("Muons2")))
@@ -89,7 +89,7 @@ ThirdMuonFilter::ThirdMuonFilter(const edm::ParameterSet& iConfig):
 }
 
 
-ThirdMuonFilter::~ThirdMuonFilter()
+ThirdMuonFilterTight::~ThirdMuonFilterTight()
 {
  
    // do anything here that needs to be done at destruction time
@@ -104,7 +104,7 @@ ThirdMuonFilter::~ThirdMuonFilter()
 
 // ------------ method called on each new Event  ------------
 bool
-ThirdMuonFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
+ThirdMuonFilterTight::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
    using namespace reco;
@@ -127,7 +127,7 @@ ThirdMuonFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
      {
 
 
-       if(  (fabs(iMuon->eta())  < 2.4 )  && (iMuon->pt() > 3) && iMuon->passed(0))
+       if(  (fabs(iMuon->eta())  < 2.4 )  && (iMuon->pt() > 3) && iMuon->passed(3))
          {
            for(pat::MuonCollection::const_iterator iMu = Muons1->begin() ; iMu !=Muons1->end() ; ++iMu)
 
@@ -183,19 +183,19 @@ ThirdMuonFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------
 void
-ThirdMuonFilter::beginStream(edm::StreamID)
+ThirdMuonFilterTight::beginStream(edm::StreamID)
 {
 }
 
 // ------------ method called once each stream after processing all runs, lumis and events  ------------
 void
-ThirdMuonFilter::endStream() {
+ThirdMuonFilterTight::endStream() {
 }
 
 // ------------ method called when starting to processes a run  ------------
 /*
 void
-ThirdMuonFilter::beginRun(edm::Run const&, edm::EventSetup const&)
+ThirdMuonFilterTight::beginRun(edm::Run const&, edm::EventSetup const&)
 { 
 }
 */
@@ -203,7 +203,7 @@ ThirdMuonFilter::beginRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when ending the processing of a run  ------------
 /*
 void
-ThirdMuonFilter::endRun(edm::Run const&, edm::EventSetup const&)
+ThirdMuonFilterTight::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -211,7 +211,7 @@ ThirdMuonFilter::endRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
 void
-ThirdMuonFilter::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+ThirdMuonFilterTight::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
@@ -219,14 +219,14 @@ ThirdMuonFilter::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSet
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
 void
-ThirdMuonFilter::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+ThirdMuonFilterTight::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
  
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-ThirdMuonFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+ThirdMuonFilterTight::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -234,4 +234,4 @@ ThirdMuonFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
   descriptions.addDefault(desc);
 }
 //define this as a plug-in
-DEFINE_FWK_MODULE(ThirdMuonFilter);
+DEFINE_FWK_MODULE(ThirdMuonFilterTight);
