@@ -206,6 +206,7 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    edm::Service<TFileService> f;
    const int  nbins =5;
    double edges[nbins+1]={10,15,20,30,50,100};
+   double edgesLep[nbins+1]={0,10,20,30,50,100};
    TauEff = f->make<TEfficiency>("TauEff","Tau Reconstruction  Efficiency;Pt(GeV);#epsilon",nbins,edges);
    
    NumDMode = f->make<TH1F>("NumDMode","Numerator for Reconstruction Efficiency;Jet Pt(GeV);# of Events",nbins,edges);
@@ -217,11 +218,11 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    NumIsodR = f->make<TH1D>("NumIsodR","Numerator for Isolation Efficiency;dR(#tau_{had},#tau_{#mu});# of Events",10,0,1);
    DenomIsodR = f->make<TH1D>("DenomIsodR","Denominator for Isolation Efficiency;dR(#tau_{had},#tau_{#mu});# of Events",10,0,1);
    
-   NumTotalLep = f->make<TH1D>("NumTotalLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edges);
-   DenomTotalLep = f->make<TH1D>("DenomTotalLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edges);
+   NumTotalLep = f->make<TH1D>("NumTotalLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edgesLep);
+   DenomTotalLep = f->make<TH1D>("DenomTotalLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edgesLep);
    
-   NumIsoLep = f->make<TH1D>("NumIsoLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edges);
-   DenomIsoLep = f->make<TH1D>("DenomIsoLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edges);
+   NumIsoLep = f->make<TH1D>("NumIsoLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edgesLep);
+   DenomIsoLep = f->make<TH1D>("DenomIsoLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edgesLep);
 
    
    
@@ -240,8 +241,8 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    NumIsoVis = f->make<TH1D>("NumIsoVis","Numerator for Isolation Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomIsoVis = f->make<TH1D>("DenomIsoVis","Denominator for Isolation Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
 
-   NumdRLep= f->make<TH2D>("NumdRLep","#tau_{#mu} Pt (GeV) vs dR(#tau_{had},#tau_{#mu});dR(#tau_{had},#tau_{#mu});#tau_{#mu} Pt (GeV)",10,0,1,nbins,edges);
-   DenomdRLep= f->make<TH2D>("DenomdRLep","#tau_{#mu} Pt (GeV) vs dR(#tau_{had}),#tau_{#mu};dR(#tau_{had},#tau_{#mu});#tau_{#mu} Pt (GeV)",10,0,1,nbins,edges);
+   NumdRLep= f->make<TH2D>("NumdRLep","#tau_{#mu} Pt (GeV) vs dR(#tau_{had},#tau_{#mu});dR(#tau_{had},#tau_{#mu});#tau_{#mu} Pt (GeV)",10,0,1,nbins,edgesLep);
+   DenomdRLep= f->make<TH2D>("DenomdRLep","#tau_{#mu} Pt (GeV) vs dR(#tau_{had}),#tau_{#mu};dR(#tau_{had},#tau_{#mu});#tau_{#mu} Pt (GeV)",10,0,1,nbins,edgesLep);
 
    
    
@@ -459,20 +460,13 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    double MuDecayEta=99999;
    double MuDecayPhi=99999;
    
-   //TLorentzVector Tau_Undecayed;
-   //TLorentzVector Tau_Had;
    TLorentzVector VisProducts;
    TLorentzVector VisHad;
    TLorentzVector VisDecayMuon;
    TLorentzVector VisDecayHad;
-   //TLorentzVector Tau_Neutrino;
-   //double Tau_had_pt_v1=99999;
-   double Tau_had_pt_v2=99999;
-   // double dRTauMu=99999;
-   // double dRDecayTauMu=99999;
-   // double dRTauDecayMu=99999;
-   // double dRDecayTauDecayMu=99999;
    
+   double Tau_had_pt_v2=99999;
+    
    
    bool TauFound=false;
    bool TauDecay=false;
@@ -493,10 +487,10 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	   const Candidate * Tau = &(*pruned)[i];
            if (fabs(Tau->mother()->pdgId())==36)
              {
-	       cout << " Tau from PseudoScalar " <<endl;
+	       //cout << " Tau from PseudoScalar " <<endl;
 	       
                const Candidate *PseudoTau = &(*pruned)[i];
-	       cout<< " Tau Pt: " << PseudoTau->pt() <<endl;
+	       //cout<< " Tau Pt: " << PseudoTau->pt() <<endl;
                unsigned  n=PseudoTau->numberOfDaughters();
 	       
                for ( size_t j =0; j < n ; j++)
@@ -509,7 +503,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		   std::vector<const reco::Candidate*> Decaydaughters;
 		   Decaydaughters.clear();
 		   
-		   cout<< " Daughter no:  "<< j << "  pdgId: " << Daughter->pdgId() <<" Daughter Pt: " << Daughter->pt()<<" Daughter Status: " << Daughter->status()<<endl;
+		   //cout<< " Daughter no:  "<< j << "  pdgId: " << Daughter->pdgId() <<" Daughter Pt: " << Daughter->pt()<<" Daughter Status: " << Daughter->status()<<endl;
 		   bool isHad= false;
 		   bool isMuon=false;
 		   bool FSR=false;
@@ -521,14 +515,14 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		       FSR=isFSR(Daughter);
 		       
 		       
-		       cout<<" ************** FSR Flag****************: " << FSR <<endl; 
+		       //cout<<" ************** FSR Flag****************: " << FSR <<endl; 
 		       if(!FSR)    
 			 {
 			   Decaydaughters=FindStat1Vis(Daughter);
 			   
 			   for (unsigned int jDau = 0; jDau < Decaydaughters.size(); jDau++)
                              {
-			       cout<<" Recursive Visible  Decaydaughter pdgId :  " <<  Decaydaughters[jDau]->pdgId() << "  Recursive Visible Decaydaughter Status: "<<   Decaydaughters[jDau]->status()  <<" Recursive Visible Decaydaughter Pt:"<< Decaydaughters[jDau]->pt()<<endl;
+			       //cout<<" Recursive Visible  Decaydaughter pdgId :  " <<  Decaydaughters[jDau]->pdgId() << "  Recursive Visible Decaydaughter Status: "<<   Decaydaughters[jDau]->status()  <<" Recursive Visible Decaydaughter Pt:"<< Decaydaughters[jDau]->pt()<<endl;
 			       
 			       //------------------------Decayed Tau_mu-----------------------------------------------
 			       if(fabs(Decaydaughters[jDau]->pdgId())==13)
@@ -536,7 +530,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 				   
 				   VisDecayMuon +=TLorentzVector(Decaydaughters[jDau]->p4().px(),Decaydaughters[jDau]->p4().py(),Decaydaughters[jDau]->p4().pz(),Decaydaughters[jDau]->p4().e());
 				   
-				   cout<<" Recursively Identified Muon pdgId : " << Decaydaughters[jDau]->pdgId() << " Recursively identified Muon  Status:    "<<   Decaydaughters[jDau]->status()  <<" Recursively Identified Muon Pt: "<< Decaydaughters[jDau]->pt()<<endl;
+				   //cout<<" Recursively Identified Muon pdgId : " << Decaydaughters[jDau]->pdgId() << " Recursively identified Muon  Status:    "<<   Decaydaughters[jDau]->status()  <<" Recursively Identified Muon Pt: "<< Decaydaughters[jDau]->pt()<<endl;
 
 				   isMuon=true;
 				 }
@@ -544,7 +538,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			       else
 				 {
 				   VisDecayHad+=TLorentzVector(Decaydaughters[jDau]->p4().px(),Decaydaughters[jDau]->p4().py(),Decaydaughters[jDau]->p4().pz(),Decaydaughters[jDau]->p4().e());
-				   cout<<"  Recursively Identified Hadron pdgId : " << Decaydaughters[jDau]->pdgId() << " Recursively identified Hadron  Status:  "<<   Decaydaughters[jDau]->status()  <<"  Recursive Identified  Hadron Pt:"<< Decaydaughters[jDau]->pt()<<endl;
+				   //cout<<"  Recursively Identified Hadron pdgId : " << Decaydaughters[jDau]->pdgId() << " Recursively identified Hadron  Status:  "<<   Decaydaughters[jDau]->status()  <<"  Recursive Identified  Hadron Pt:"<< Decaydaughters[jDau]->pt()<<endl;
 				   isHad=true;
 				 }
 			       
@@ -615,7 +609,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			   for (unsigned int jDau = 0; jDau < daughters.size(); jDau++)
 			     {
 			       VisHad +=TLorentzVector(daughters[jDau]->p4().px(),daughters[jDau]->p4().py(),daughters[jDau]->p4().pz(),daughters[jDau]->p4().e());
-			       cout<<" Recursive daughter pdgId : " << daughters[jDau]->pdgId() << "Recursive Daughter Status:    "<<   daughters[jDau]->status()  <<" Recursive Daughter Pt:"<< daughters[jDau]->pt()<<endl; 
+			       //cout<<" Recursive daughter pdgId : " << daughters[jDau]->pdgId() << "Recursive Daughter Status:    "<<   daughters[jDau]->status()  <<" Recursive Daughter Pt:"<< daughters[jDau]->pt()<<endl; 
 			     }
 			   
 			 }
