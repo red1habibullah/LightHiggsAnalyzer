@@ -129,6 +129,9 @@ private:
   TH1D *NumIsoVis;
   TH1D *DenomIsoVis;
 
+  TH2D *NumdRLep;
+  TH2D *DenomdRLep;
+  
   
   
   TEfficiency* TauEffDMode;
@@ -211,6 +214,7 @@ TauEfficiency::TauEfficiency(const edm::ParameterSet& iConfig):
    //TauEff = f->make<TEfficiency>("TauEff","Tau Reconstruction  Efficiency;Pt(GeV);#epsilon",20,0,100);
    const int  nbins =5;
    double edges[nbins+1]={10,15,20,30,50,100};
+   double edgesLep[nbins+1]={0,10,20,30,50,100};
    TauEff = f->make<TEfficiency>("TauEff","Tau Isolation  Efficiency;Pt(GeV);#epsilon",nbins,edges);
    
 
@@ -225,11 +229,11 @@ TauEfficiency::TauEfficiency(const edm::ParameterSet& iConfig):
 
    
    
-   NumTotalLep = f->make<TH1D>("NumTotalLep","Numerator for Reconstruction Efficiency;#tau_{e} Pt(GeV);# of Events",nbins,edges);
-   DenomTotalLep = f->make<TH1D>("DenomTotalLep","Denominator for Reconstruction Efficiency;#tau_{e} Pt (GeV);# of Events",nbins,edges);
+   NumTotalLep = f->make<TH1D>("NumTotalLep","Numerator for Reconstruction Efficiency;#tau_{e} Pt(GeV);# of Events",nbins,edgesLep);
+   DenomTotalLep = f->make<TH1D>("DenomTotalLep","Denominator for Reconstruction Efficiency;#tau_{e} Pt (GeV);# of Events",nbins,edgesLep);
    
-   NumIsoLep = f->make<TH1D>("NumIsoLep","Numerator for Reconstruction Efficiency;#tau_{e} Pt(GeV);# of Events",nbins,edges);
-   DenomIsoLep = f->make<TH1D>("DenomIsoLep","Denominator for Reconstruction Efficiency;#tau_{e} Pt (GeV);# of Events",nbins,edges);
+   NumIsoLep = f->make<TH1D>("NumIsoLep","Numerator for Reconstruction Efficiency;#tau_{e} Pt(GeV);# of Events",nbins,edgesLep);
+   DenomIsoLep = f->make<TH1D>("DenomIsoLep","Denominator for Reconstruction Efficiency;#tau_{e} Pt (GeV);# of Events",nbins,edgesLep);
 
    NumVis = f->make<TH1D>("NumVis","Numerator for Reconstruction Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomVis = f->make<TH1D>("DenomVis","Denominator for Reconstruction Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
@@ -243,7 +247,9 @@ TauEfficiency::TauEfficiency(const edm::ParameterSet& iConfig):
 
    NumIsoVis = f->make<TH1D>("NumIsoVis","Numerator for Isolation Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomIsoVis = f->make<TH1D>("DenomIsoVis","Denominator for Isolation Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
-
+   
+   NumdRLep= f->make<TH2D>("NumdRLep","#tau_{#mu} Pt (GeV) vs dR(#tau_{had},#tau_{#mu});dR(#tau_{had},#tau_{#mu});#tau_{e} Pt (GeV)",10,0,1,nbins,edgesLep);
+   DenomdRLep= f->make<TH2D>("DenomdRLep","#tau_{#mu} Pt (GeV) vs dR(#tau_{had}),#tau_{#mu};dR(#tau_{had},#tau_{#mu});#tau_{e} Pt (GeV)",10,0,1,nbins,edgesLep);
 
    TauEffDMode = f->make<TEfficiency>("TauEffDMode","Tau DecayMode  Efficiency;Pt(GeV);#epsilon",nbins,edges);
    TauEffDModes = f->make<TEfficiency>("TauEffDModes","Tau DecayMode  Efficiency;DecayModes;#epsilon",12,-0.5,11.5);
@@ -351,7 +357,7 @@ std::vector<const reco::Candidate*>TauEfficiency::FindStat1Vis( const reco::Cand
       for (int i=0; i < nGrandDaughters; i++)
 	{
 	  const reco::Candidate* GrandDaughter= particle->daughter(i);
-	  std::cout<< " GrandDaughter no:  "<< i << "  pdgId: " << GrandDaughter->pdgId() <<" GrandDaughter Pt: " << GrandDaughter->pt()<<" GrandDaughter Status: " << GrandDaughter->status()<<std::endl;
+	  //std::cout<< " GrandDaughter no:  "<< i << "  pdgId: " << GrandDaughter->pdgId() <<" GrandDaughter Pt: " << GrandDaughter->pt()<<" GrandDaughter Status: " << GrandDaughter->status()<<std::endl;
 
 	  if(GrandDaughter->status() == 1)
 	    {
@@ -473,7 +479,7 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		   
 
 
-		   cout<< " Daughter no:  "<< j << "  pdgId: " << Daughter->pdgId() <<" Daughter Pt: " << Daughter->pt()<<" Daughter Status: " << Daughter->status()<<endl;
+		   //cout<< " Daughter no:  "<< j << "  pdgId: " << Daughter->pdgId() <<" Daughter Pt: " << Daughter->pt()<<" Daughter Status: " << Daughter->status()<<endl;
 
 		   bool isHad= false;
 		   bool isElectron =false;
@@ -486,7 +492,7 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				
 				for (unsigned int jDau = 0; jDau < Decaydaughters.size(); jDau++)
 				  {
-				    cout<<" Recursive Visible  Decaydaughter pdgId :  " <<  Decaydaughters[jDau]->pdgId() << "  Recursive Visible Decaydaughter Status: "<<   Decaydaughters[jDau]->status()  <<" Recursive Visible Decaydaughter Pt:"<< Decaydaughters[jDau]->pt()<<endl;
+				    //cout<<" Recursive Visible  Decaydaughter pdgId :  " <<  Decaydaughters[jDau]->pdgId() << "  Recursive Visible Decaydaughter Status: "<<   Decaydaughters[jDau]->status()  <<" Recursive Visible Decaydaughter Pt:"<< Decaydaughters[jDau]->pt()<<endl;
 				           
 				   ///------------------------Decayed Tau_e-----------------------------------------------
 				    if(fabs(Decaydaughters[jDau]->pdgId())==11)
@@ -494,7 +500,7 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 					   
 					VisDecayElectron +=TLorentzVector(Decaydaughters[jDau]->p4().px(),Decaydaughters[jDau]->p4().py(),Decaydaughters[jDau]->p4().pz(),Decaydaughters[jDau]->p4().e());
 					   
-					cout<<" Recursively Identified Electon pdgId : " <<  Decaydaughters[jDau]->pdgId()  << " Recursively identified Electron  Status:    "<<   Decaydaughters[jDau]->status()  <<"  Recursively Identified Electron Pt: "<< Decaydaughters[jDau]->pt()<<endl;
+					//cout<<" Recursively Identified Electon pdgId : " <<  Decaydaughters[jDau]->pdgId()  << " Recursively identified Electron  Status:    "<<   Decaydaughters[jDau]->status()  <<"  Recursively Identified Electron Pt: "<< Decaydaughters[jDau]->pt()<<endl;
 
 					isElectron=true;
 				      }
@@ -503,7 +509,7 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				      {
 					VisDecayHad+=TLorentzVector(Decaydaughters[jDau]->p4().px(),Decaydaughters[jDau]->p4().py(),Decaydaughters[jDau]->p4().pz(),Decaydaughters[jDau]->p4().e());
 					
-					cout<<"  Recursively Identified Hadron pdgId:  " <<  Decaydaughters[jDau]->pdgId()  << "   Recursively identified Hadron  Status:  "<<   Decaydaughters[jDau]->status()  <<"  Recursive Identified  Hadron Pt: "<< Decaydaughters[jDau]->pt()<<endl;
+					//cout<<"  Recursively Identified Hadron pdgId:  " <<  Decaydaughters[jDau]->pdgId()  << "   Recursively identified Hadron  Status:  "<<   Decaydaughters[jDau]->status()  <<"  Recursive Identified  Hadron Pt: "<< Decaydaughters[jDau]->pt()<<endl;
 					isHad=true;
 				      }
 								
@@ -600,7 +606,7 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				    for (unsigned int jDau = 0; jDau < daughters.size(); jDau++)
 				      {
 					VisHad +=TLorentzVector(daughters[jDau]->p4().px(),daughters[jDau]->p4().py(),daughters[jDau]->p4().pz(),daughters[jDau]->p4().e());
-					cout<<" Recursive daughter pdgId : " << daughters[jDau]->pdgId() << "Recursive Daughter Status:    "<<   daughters[jDau]->status()  <<" Recursive Daughter Pt:"<< daughters[jDau]->pt()<<endl; 
+					//cout<<" Recursive daughter pdgId : " << daughters[jDau]->pdgId() << "Recursive Daughter Status:    "<<   daughters[jDau]->status()  <<" Recursive Daughter Pt:"<< daughters[jDau]->pt()<<endl; 
 				      }
 				       
 				  }
@@ -765,28 +771,28 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		 {
 		   dRTauEle=reco::deltaR(PseudoTauEta,PseudoTauPhi,EleEta,ElePhi);
 		   TauEle=true;
-		   cout<<" dRTauEle: "<< dRTauEle<<endl;
+		   //cout<<" dRTauEle: "<< dRTauEle<<endl;
 
 		 }
 	       if(TauFound && EleDecay)
 		 {
 		   dRTauDecayEle=reco::deltaR(PseudoTauEta,PseudoTauPhi,EleDecayEta,EleDecayPhi);
 		   TauDecayEle = true;
-		   cout<<" dRTauDecayEle: "<< dRTauDecayEle<<endl;
+		   //cout<<" dRTauDecayEle: "<< dRTauDecayEle<<endl;
 
 		 }
 	       if(TauDecay && EleFound)
 		 {
 		   dRDecayTauEle=reco::deltaR(DecayTauEta,DecayTauPhi,EleEta,ElePhi);
 		   DecayTauEle = true;
-		   cout<<" dRDecayTauEle: "<< dRDecayTauEle<<endl;
+		   //cout<<" dRDecayTauEle: "<< dRDecayTauEle<<endl;
 
 		 }
 	       if(TauDecay && EleDecay)
 		 {
 		   dRDecayTauDecayEle=reco::deltaR(DecayTauEta,DecayTauPhi,EleDecayEta,EleDecayPhi);
 		   DecayTauDecayEle= true;
-		   cout<<" dRDecayTauDecayEle: "<< dRDecayTauDecayEle<<endl;
+		   //cout<<" dRDecayTauDecayEle: "<< dRDecayTauDecayEle<<endl;
 		 }
 
 
@@ -871,6 +877,35 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
                      {
                        DenomIsodR->Fill(dRDecayTauDecayEle);
 		     }
+		   
+		   
+		   if(TauEle)
+                     {
+                       DenomdRLep->Fill(dRTauEle,ElePt);
+		       DenomdRLep->SetDrawOption("COLZ");
+
+                     }
+                   if(TauDecayEle)
+                     {
+                       DenomdRLep->Fill(dRTauDecayEle,(double)VisDecayElectron.Pt());
+		       DenomdRLep->SetDrawOption("COLZ");
+
+		     }
+                   if(DecayTauEle)
+                     {
+                       DenomdRLep->Fill(dRDecayTauEle,ElePt);
+		       DenomdRLep->SetDrawOption("COLZ");
+
+		     }
+                   if (DecayTauDecayEle)
+                     {
+                       DenomdRLep->Fill(dRDecayTauDecayEle,(double)VisDecayElectron.Pt());
+		       DenomdRLep->SetDrawOption("COLZ");
+
+		     }
+
+
+
 
 
 
@@ -1050,9 +1085,33 @@ mIsolationMVArun2v1DBoldDMwLT")));
 			   NumTotalLep->Fill((double)VisDecayElectron.Pt());
 
 			 }
+		       if(TauEle)
+			 {
+			   NumdRLep->Fill(dRTauEle,ElePt);
+			   NumdRLep->SetDrawOption("COLZ");
+
+			 }
+		       if(TauDecayEle)
+			 {
+			   NumdRLep->Fill(dRTauDecayEle,(double)VisDecayElectron.Pt());
+			   NumdRLep->SetDrawOption("COLZ");
+
+			 }
+		       if(DecayTauEle)
+			 {
+			   NumdRLep->Fill(dRDecayTauEle,ElePt);
+			   NumdRLep->SetDrawOption("COLZ");
+
+			 }
+		       if (DecayTauDecayEle)
+			 {
+			   NumdRLep->Fill(dRDecayTauDecayEle,(double)VisDecayElectron.Pt());
+			   NumdRLep->SetDrawOption("COLZ");
+
+			 }
 
 
-		     
+		       
 		     
 		     
 		     }
