@@ -111,18 +111,18 @@ private:
 
   TH1D *NumVis;
   TH1D *DenomVis;
-  
+  //=======================Histogram vs Lep Pt=====================
   TH1D *NumTotalLep;
   TH1D* DenomTotalLep;
   
   TH1D *NumIsoLep;
   TH1D* DenomIsoLep;
 
-  
+  //====================Histogram vs dR=============================
   TH1D* NumTotaldR;
   TH1D* DenomTotaldR;
   
-  
+  //================= Histogram vs Tau_had Vis Pt===================
   TH1D *NumTotalVis;
   TH1D *DenomTotalVis;
   

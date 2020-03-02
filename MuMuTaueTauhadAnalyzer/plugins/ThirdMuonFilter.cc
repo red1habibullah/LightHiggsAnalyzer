@@ -142,7 +142,7 @@ ThirdMuonFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
                    Matchmu2=(deltaR(*iMuon,*imu) < 0.0001)  && (fabs(iMuon->pt()-imu->pt()) < 0.0001);
                    if(!(Matchmu1) && !(Matchmu2))
 		     {
-		       //cout<< " Muon: " <<  iMuon_Id  << " Pt: " << iMuon->pt() << "  eta: " << iMuon->eta() << " phi: " << iMuon->phi() << " pdgId: " <<  iMuon->pdgId()  << endl;
+		       cout<< " Muon: " <<  iMuon_Id  << " Pt: " << iMuon->pt() << "  eta: " << iMuon->eta() << " phi: " << iMuon->phi() << " pdgId: " <<  iMuon->pdgId()  << endl;
 		       Thirdmu->push_back(*iMuon);
 		       
 		     }
@@ -155,9 +155,9 @@ ThirdMuonFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
          }
      }
 
-   bool Present=false;                                                                                                             
+   //bool Present=false;                                                                                                             
    
-   Present=((Thirdmu->size()) >0);    
+   //Present=((Thirdmu->size()) >0);    
 
    iEvent.put(move(Thirdmu), "ThirdMuon");
 
@@ -175,10 +175,10 @@ ThirdMuonFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 //    ESHandle<SetupData> pSetup;
 //    iSetup.get<SetupRecord>().get(pSetup);
 // #endi
-   if(Present)
-     return true;
-   else
-     return false;
+   // if(Present)
+   return true;
+     //else
+     //return false;
 }
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------

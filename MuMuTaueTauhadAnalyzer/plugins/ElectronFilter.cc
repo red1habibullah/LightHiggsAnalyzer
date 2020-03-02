@@ -7,6 +7,7 @@
 
  Description: [one line class summary]
 Creates a collection of electrons passing the Loose Electron ID.returns true if at least one electron passes
+Tweaked to become a producer for now 
 The values have been updated for 2017 MC/Data 
  Implementation:
      [Notes on implementation]
@@ -345,9 +346,9 @@ bool ElectronFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   //return false;
   // cout<< " EB " << EBpcount << " EE " << EEpcount <<endl;
   //cout<< "Cumulative total:"<<EBpcount_c+EEpcount_c<< " EEele " << EBpcount_c << " EBele " << EEpcount_c<<endl;
-  if(Passcount < EBpcount + EEpcount)
-    return true;
-  else return false;
+  //if(Passcount < EBpcount + EEpcount)
+  return true;
+  //else return false;
 }
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------
