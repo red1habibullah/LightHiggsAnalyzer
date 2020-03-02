@@ -155,9 +155,9 @@ ThirdMuonFilterTight::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
          }
      }
 
-   bool Present=false;                                                                                                             
+   //bool Present=false;                                                                                                             
    
-   Present=((Thirdmu->size()) >0);    
+   //Present=((Thirdmu->size()) >0);    
 
    iEvent.put(move(Thirdmu), "ThirdMuon");
 
@@ -175,10 +175,10 @@ ThirdMuonFilterTight::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 //    ESHandle<SetupData> pSetup;
 //    iSetup.get<SetupRecord>().get(pSetup);
 // #endi
-   if(Present)
-     return true;
-   else
-     return false;
+   //if(Present)
+   return true;
+     //else
+     //return false;
 }
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------

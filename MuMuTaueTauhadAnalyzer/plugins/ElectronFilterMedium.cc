@@ -347,9 +347,9 @@ iSetup.get<SetupRecord>().get(pSetup);
   //return false;
   // cout<< " EB " << EBpcount << " EE " << EEpcount <<endl;
   //cout<< "Cumulative total:"<<EBpcount_c+EEpcount_c<< " EEele " << EBpcount_c << " EBele " << EEpcount_c<<endl;
-  if(Passcount < EBpcount + EEpcount)
-    return true;
-  else return false;
+  //if(Passcount < EBpcount + EEpcount)
+  return true;
+  //else return false;
 }
 
 // ------------ method called once each stream before processing any runs, lumis or events  ------------
