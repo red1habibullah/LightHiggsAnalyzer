@@ -115,6 +115,10 @@ private:
   TH1D *NumTotalLep;
   TH1D* DenomTotalLep;
   
+  TH1D *NumComboLep;
+  TH1D* DenomComboLep;
+
+  
   TH1D *NumIsoLep;
   TH1D* DenomIsoLep;
 
@@ -126,6 +130,11 @@ private:
   TH1D *NumTotalVis;
   TH1D *DenomTotalVis;
   
+  TH1D *NumComboVis;
+  TH1D *DenomComboVis;
+
+
+
   TH1D *NumIsoVis;
   TH1D *DenomIsoVis;
 
@@ -169,9 +178,9 @@ private:
 
   double dREleGenEle=99999;
   double dREleGenDecay=99999;
-  
+  double dREleTau=99999;
   double dRTauJet=99999;
-
+  double dRTauJetCombo=99999;
 
   double dRTauEle=99999;
   double dRDecayTauEle=99999;
@@ -228,9 +237,14 @@ TauEfficiency::TauEfficiency(const edm::ParameterSet& iConfig):
    DenomIsodR = f->make<TH1D>("DenomIsodR","Denominator for Isolation Efficiency;dR(#tau_{had},#tau_{e});# of Events",10,0,1);
 
    
-   
+   ////////////////////////////////////
    NumTotalLep = f->make<TH1D>("NumTotalLep","Numerator for Reconstruction Efficiency;#tau_{e} Pt(GeV);# of Events",nbins,edgesLep);
    DenomTotalLep = f->make<TH1D>("DenomTotalLep","Denominator for Reconstruction Efficiency;#tau_{e} Pt (GeV);# of Events",nbins,edgesLep);
+   
+   NumComboLep = f->make<TH1D>("NumComboLep","Numerator for  #tau_{e}#tau_{had} Efficiency; #tau_{e}#tau_{had} Pt(GeV);# of Events",nbins,edgesLep);
+   DenomComboLep = f->make<TH1D>("DenomComboLep","Denominator for  #tau_{e}#tau_{had} Efficiency; #tau_{e}#tau_{had} Pt (GeV);# of Events",nbins,edgesLep);
+
+
    
    NumIsoLep = f->make<TH1D>("NumIsoLep","Numerator for Reconstruction Efficiency;#tau_{e} Pt(GeV);# of Events",nbins,edgesLep);
    DenomIsoLep = f->make<TH1D>("DenomIsoLep","Denominator for Reconstruction Efficiency;#tau_{e} Pt (GeV);# of Events",nbins,edgesLep);
@@ -238,12 +252,15 @@ TauEfficiency::TauEfficiency(const edm::ParameterSet& iConfig):
    NumVis = f->make<TH1D>("NumVis","Numerator for Reconstruction Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomVis = f->make<TH1D>("DenomVis","Denominator for Reconstruction Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
 
-   
+   //////////////////////////////////////
    NumTotaldR = f->make<TH1D>("NumTotaldR","Numerator for Total Reconstruction Efficiency;dR(#tau_{had},#tau_{e});# of Events",10,0,1);
    DenomTotaldR = f->make<TH1D>("DenomTotaldR","Denominator for Total Reconstruction Efficiency;dR(#tau_{had},#tau_{e});# of Events",10,0,1);
-   
+   //////////////////////////////////////
    NumTotalVis = f->make<TH1D>("NumTotalVis","Numerator for Total Reconstruction Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomTotalVis = f->make<TH1D>("DenomTotalVis","Denominator for Total Reconstruction Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
+
+   NumComboVis = f->make<TH1D>("NumComboVis","Numerator for #tau_{e}#tau_{had} Efficiency;#tau_{e}#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
+   DenomComboVis = f->make<TH1D>("DenomComboVis","Denominator for #tau_{e}#tau_{had} Efficiency;#tau_{e}#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
 
    NumIsoVis = f->make<TH1D>("NumIsoVis","Numerator for Isolation Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomIsoVis = f->make<TH1D>("DenomIsoVis","Denominator for Isolation Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
@@ -735,12 +752,14 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	     
 	   //{
 	   //bool PassDecayMode= false;
-	       //bool AnalysisCuts= false;
+	       bool AnalysisCut= false;
 	       bool GenMatched =false;
 	       bool TauEle =false;
 	       bool TauDecayEle = false;
 	       bool DecayTauEle = false;
 	       bool DecayTauDecayEle= false;
+	       bool GenMatchedCombo=false;
+	       bool AnalysisCutCombo=false;
 	       //bool JetTauMatch=false;
 	       
 	       if(TauFound)
@@ -795,18 +814,100 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		   //cout<<" dRDecayTauDecayEle: "<< dRDecayTauDecayEle<<endl;
 		 }
 
+	       
+	       //=================================Tau_e Tau_had efficiency=================
+	       
+	       GenMatchedCombo=((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && (EleFound || EleDecay);
+	       AnalysisCutCombo=((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
+
+	    
+	       if(GenMatchedCombo && AnalysisCutCombo)
+		 {
+		 
+		   if(TauFound)
+                     {
+                       DenomComboVis->Fill((double)VisHad.Pt());
+
+                     }
+                   if(TauDecay)
+                     {
+                       DenomComboVis->Fill((double)VisDecayHad.Pt());
+
+                     }
+		   
+		   if(EleFound)
+                     {
+                       DenomComboLep->Fill(ElePt);
+
+                     }
+                   if(EleDecay)
+                     {
+                       DenomComboLep->Fill((double)VisDecayElectron.Pt());
+
+                     }
+
+
+
+		 
+
+		   bool PassMVACombo=false;
+		   for(pat::TauCollection::const_iterator iTau = Taus->begin() ; iTau !=Taus->end() ; ++iTau)
+                     {
+		       //double dREleTau=99999;
+		       dREleTau=reco::deltaR(*iTau,*iele);
+		       dRTauJetCombo=reco::deltaR(*iTau,*iJet);
+		       PassMVACombo=(dREleTau <0.8) && (dRTauJetCombo < 0.1) &&  ((iTau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (iTau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT"))) && ((EleFound && (dREleGenEle < 0.1)) || (EleDecay && (dREleGenDecay<0.1))); 
+
+		       if(PassMVACombo)
+			 {
+			 
+			   if(TauFound)
+			     {
+			       NumComboVis->Fill((double)VisHad.Pt());
+
+			     }
+			   if(TauDecay)
+			     {
+			       NumComboVis->Fill((double)VisDecayHad.Pt());
+
+			     }
+			   if(EleFound)
+			     {
+			       NumComboLep->Fill(ElePt);
+
+			     }
+			   if(EleDecay)
+			     {
+			       NumComboLep->Fill((double)VisDecayElectron.Pt());
+
+			     }
 
 
 
 
+			 
+			 
+			 }
+		     
+		     
+		     }
 
 
 
+		 
+
+
+
+		 }
+
+
+
+	       //===================================The Tau_had efficiency definition========================
+	       AnalysisCut= /*((itau->pt()) > 10 && (abs(itau->eta()) <2.3)) &&*/ ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
 	       GenMatched=((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && ((EleFound && (dREleGenEle < 0.1)) || (EleDecay && (dREleGenDecay<0.1)));
-	       //AnalysisCuts= ((itau->pt()) > 10 && (abs(itau->eta()) <2.3)) && ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
+	         
 	       
-	       
-	       if(GenMatched /*&& AnalysisCuts*/ )
+	       if(GenMatched && AnalysisCut)
 		 {
 		   
 		   ++DenomCount;
@@ -957,8 +1058,7 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		   dRTauJet=reco::deltaR(*itau,*iJet);
 		   PassDecayMode=(itau->tauID("decayModeFinding")) && (dRTauJet< 0.1);
 		   PassDecayModePassMVA=(itau->tauID("decayModeFinding")) && (dRTauJet< 0.1) && ((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")));
-		   PassMVA= (dRTauJet< 0.1) && ((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediu\
-mIsolationMVArun2v1DBoldDMwLT")));
+		   PassMVA= (dRTauJet< 0.1) && ((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")));
 
 		   
 		   
