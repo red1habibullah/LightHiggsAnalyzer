@@ -1,4 +1,3 @@
-
 # Import CMS python class definitions such as Process, Source, and EDProducer
 import FWCore.ParameterSet.Config as cms
 #this should be used finally
@@ -96,16 +95,16 @@ process.source = cms.Source("PoolSource",
 # 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-12_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA12_DiMuDiTau_Fall17DRPremix_v2/200212_215740/0000/mumutautau_MultipleID_7.root',
 # 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-12_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA12_DiMuDiTau_Fall17DRPremix_v2/200212_215740/0000/mumutautau_MultipleID_8.root',
 # 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-12_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA12_DiMuDiTau_Fall17DRPremix_v2/200212_215740/0000/mumutautau_MultipleID_9.root'
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_1.root',
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_10.root',
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_2.root',
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_3.root',
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_4.root',
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_5.root',
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_6.root',
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_7.root',
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_8.root',
-'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_9.root'
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_1.root',
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_10.root',
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_2.root',
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_3.root',
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_4.root',
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_5.root',
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_6.root',
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_7.root',
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_8.root',
+# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-13_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA13_DiMuDiTau_Fall17DRPremix_v15/200212_220609/0000/mumutautau_MultipleID_9.root'
 # 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-16_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA16_DiMuDiTau_Fall17DRPremix_v5/200203_070307/0000/mumutautau_MultipleID_1.root',
 # 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-16_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA16_DiMuDiTau_Fall17DRPremix_v5/200203_070307/0000/mumutautau_MultipleID_10.root',
 # 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-16_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA16_DiMuDiTau_Fall17DRPremix_v5/200203_070307/0000/mumutautau_MultipleID_11.root',
@@ -129,19 +128,19 @@ process.source = cms.Source("PoolSource",
 # 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-19_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA19_DiMuDiTau_Fall17DRPremix_v4/200203_072651/0000/mumutautau_MultipleID_7.root',
 # 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-19_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA19_DiMuDiTau_Fall17DRPremix_v4/200203_072651/0000/mumutautau_MultipleID_8.root',
 # 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-19_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA19_DiMuDiTau_Fall17DRPremix_v4/200203_072651/0000/mumutautau_MultipleID_9.root'
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_1.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_10.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_11.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_12.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_13.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_2.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_3.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_4.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_5.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_6.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_7.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_8.root',
-# 'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_9.root'
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_1.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_10.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_11.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_12.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_13.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_2.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_3.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_4.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_5.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_6.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_7.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_8.root',
+'file:/eos/uscms/store/user/rhabibul/SUSYGluGluToHToAA_AToMuMu_AToTauTau_M-125_M-20_TuneCUETP8M1_13TeV_madgraph_pythia8/MiniAOD_H125AA20_DiMuDiTau_Fall17DRPremix_v5/200203_073712/0000/mumutautau_MultipleID_9.root'
 
 
 
@@ -265,7 +264,20 @@ process.ThirdMuFilterTight = cms.EDFilter("ThirdMuonFilterTight",
 )
 
 
+####################################################################################################
+process.MuEffLoose=cms.EDAnalyzer("MuonEfficiency",
+                           pruned  = cms.InputTag("prunedGenParticles"),
+                           muonSrc =cms.InputTag("ThirdMuFilter","ThirdMuon","complete"),
+)
+process.MuEffMedium=cms.EDAnalyzer("MuonEfficiency",
+                           pruned  = cms.InputTag("prunedGenParticles"),
+                           muonSrc =cms.InputTag("ThirdMuFilterMedium","ThirdMuon","complete"),
+)
 
+process.MuEffTight=cms.EDAnalyzer("MuonEfficiency",
+                           pruned  = cms.InputTag("prunedGenParticles"),
+                           muonSrc =cms.InputTag("ThirdMuFilterTight","ThirdMuon","complete"),
+)
 
 
 
@@ -300,15 +312,14 @@ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 process.TFileService = cms.Service("TFileService",
                                 
-                                   fileName = cms.string('file:TauEfficiency_MuonAllID_mA13_SemiFinal.root')
+                                   fileName = cms.string('file:TauEfficiency_MuonAllID_mA20_OldTauID.root')
                                    )
 
 
 
-
-process.p_l = cms.Path(process.GenModeFilterMu*process.DiMuFilter*process.ThirdMuFilter*process.TauEffDModeLoose*process.TauEffMDModeLoose);
-process.p_m = cms.Path(process.GenModeFilterMu*process.DiMuFilter*process.ThirdMuFilterMedium*process.TauEffDModeMedium*process.TauEffMDModeMedium);
-process.p_t = cms.Path(process.GenModeFilterMu*process.DiMuFilter*process.ThirdMuFilterTight*process.TauEffDModeTight*process.TauEffMDModeTight);
+process.p_l = cms.Path(process.GenModeFilterMu*process.DiMuFilter*process.ThirdMuFilter*process.MuEffLoose*process.TauEffDModeLoose*process.TauEffMDModeLoose);
+process.p_m = cms.Path(process.GenModeFilterMu*process.DiMuFilter*process.ThirdMuFilterMedium*process.MuEffMedium*process.TauEffDModeMedium*process.TauEffMDModeMedium);
+process.p_t = cms.Path(process.GenModeFilterMu*process.DiMuFilter*process.ThirdMuFilterTight*process.MuEffTight*process.TauEffDModeTight*process.TauEffMDModeTight);
 process.schedule=cms.Schedule(process.p_l,process.p_m,process.p_t)
 
 

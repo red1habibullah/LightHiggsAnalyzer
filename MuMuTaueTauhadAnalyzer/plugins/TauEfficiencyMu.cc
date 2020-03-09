@@ -110,6 +110,9 @@ private:
   TH1D *NumTotalLep;
   TH1D *DenomTotalLep;
   
+  TH1D *NumComboLep;
+  TH1D* DenomComboLep;
+  
   TH1D *NumIsoLep;
   TH1D *DenomIsoLep;
 
@@ -118,6 +121,9 @@ private:
   
   TH1D *NumTotalVis;
   TH1D *DenomTotalVis;
+
+  TH1D *NumComboVis;
+  TH1D *DenomComboVis;
 
   //TH1D* NumIsodR;
   //TH1D* DenomIsodR;
@@ -158,11 +164,18 @@ private:
   double dRJetGenTau=99999;
   double dRJetGenDecay=99999;
 
+  double dRJetGenTauRep=99999;
+  double dRJetGenDecayRep=99999;
+
   double dRMuGenMu=99999;
   double dRMuGenDecay=99999;
   
-  double dRTauJet=99999;
+  double dRMuGenMuRep=99999;
+  double dRMuGenDecayRep=99999;
   
+  double dRMuTau=99999;
+  double dRTauJet=99999;
+  double dRTauJetCombo=99999;
   
   double dRTauMu=99999;
   double dRDecayTauMu=99999;
@@ -221,6 +234,11 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
    NumTotalLep = f->make<TH1D>("NumTotalLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edgesLep);
    DenomTotalLep = f->make<TH1D>("DenomTotalLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edgesLep);
    
+   
+   NumComboLep = f->make<TH1D>("NumComboLep","Numerator for  #tau_{#mu}#tau_{had} Efficiency; #tau_{#mu}#tau_{had} Pt(GeV);# of Events",nbins,edgesLep);
+   DenomComboLep = f->make<TH1D>("DenomComboLep","Denominator for  #tau_{#mu}#tau_{had} Efficiency; #tau_{#mu}#tau_{had} Pt (GeV);# of Events",nbins,edgesLep);
+   
+   
    NumIsoLep = f->make<TH1D>("NumIsoLep","Numerator for Reconstruction Efficiency;#tau_{#mu} Pt(GeV);# of Events",nbins,edgesLep);
    DenomIsoLep = f->make<TH1D>("DenomIsoLep","Denominator for Reconstruction Efficiency;#tau_{#mu} Pt (GeV);# of Events",nbins,edgesLep);
 
@@ -234,6 +252,9 @@ TauEfficiencyMu::TauEfficiencyMu(const edm::ParameterSet& iConfig):
 
    NumTotalVis = f->make<TH1D>("NumTotalVis","Numerator for Total Reconstruction Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
    DenomTotalVis = f->make<TH1D>("DenomTotalVis","Denominator for Total Reconstruction Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
+
+   NumComboVis = f->make<TH1D>("NumComboVis","Numerator for #tau_{#mu}#tau_{had} Efficiency;#tau_{had} Visible Pt(GeV);# of Events",nbins,edges);
+   DenomComboVis = f->make<TH1D>("DenomComboVis","Denominator for #tau_{#mu}#tau_{had} Efficiency;#tau_{had} Visible Pt (GeV);# of Events",nbins,edges);
 
    //NumIsodR = f->make<TH1D>("NumIsodR","Numerator for Isolation Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
    //DenomIsodR = f->make<TH1D>("DenomIsodR","Denominator for Isolation Efficiency;dR(#tau_{had},#tau_{lep});# of Events",10,0,1);
@@ -456,6 +477,16 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    double MuPhi=99999;
    double MuEta=99999;
    double MuPt=99999;
+   
+   vector <double> DRs;
+   DRs.clear();
+   vector <double> DRDecays;
+   DRDecays.clear();
+   
+   vector <double> DRsRep;
+   DRsRep.clear();
+   vector <double> DRDecaysRep;
+   DRDecaysRep.clear();
 
    double MuDecayEta=99999;
    double MuDecayPhi=99999;
@@ -479,6 +510,15 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
    bool TmuThad=false;
    
+
+
+
+
+
+
+
+
+   //-----------------------Determination of Gen Tau_mu Tau_Had-------------------------------------
    for(size_t i=0; i<(pruned.product())->size() ;i++)
      {
        if(fabs((*pruned)[i].pdgId())==15)
@@ -623,25 +663,12 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		      )
                      {
 		       
-		     
-		   // if((fabs(Daughter->pdgId())==16))
-		   // 	 {
-			   
-		   // 	   cout<< " Daughter  Neutrino :  "<< j << "  pdgId: " << Daughter->pdgId() <<" Pt:     "<< Daughter->pt()<<endl;
 
-		   // 	   Tau_Neutrino+=TLorentzVector(Daughter->p4().px(),Daughter->p4().py(),Daughter->p4().pz(),Daughter->p4().e());			 
-		   // 	 }
-		     
 		       if((fabs(Daughter->pdgId())!=16))
 			 {
 		       //cout<< " Daughter in Tau Had:  "<< j << "  pdgId: " << Daughter->pdgId() <<" Pt:     "<< Daughter->pt()<<endl;
 			   VisProducts +=TLorentzVector(Daughter->p4().px(),Daughter->p4().py(),Daughter->p4().pz(),Daughter->p4().e());
  
-		     // if(!TauCalc)
-		     // 	 {
-		     // 	   cout<<" Tau Stored Pt: "<< PseudoTau->pt() <<endl;
-		     //   Tau_Undecayed+=TLorentzVector(PseudoTau->p4().px(),PseudoTau->p4().py(),PseudoTau->p4().pz(),PseudoTau->p4().e());
-		     //   TauCalc=true;
 			 }
 		     }
 		   
@@ -651,18 +678,6 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		   
 		   
 		   
-		   
-		   
-		   
-		   // if( (!TauFound) && (fabs(Daughter->pdgId())!=13) &&  (fabs(Daughter->pdgId())!=14) && (fabs(Daughter->pdgId())!=15) && (fabs(Daughter->pdgId())!=22) &&  (fabs(Daughter->pdgId())!=16) // && ((PseudoTau->pt()) > 10) && (abs(PseudoTau->eta()) <2.3)
-		   //     )
-                   //   {
-                                                                                                                                       
-                   //     TauFound=true;
-		   //     //cout<< " Daughter no:  "<< j << "  pdgId: " << Daughter->pdgId() <<endl;
-                   //     PseudoTauPhi=(double)(PseudoTau->phi());
-                   //     PseudoTauEta=(double)(PseudoTau->eta());
-                   //   }
 		   
 		   
 		   
@@ -702,6 +717,10 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
      }
    
    
+
+
+
+   //-------------------_Tau_mu Tau_had count-----------------------------
    TmuThad=((TauFound) || (TauDecay )) && ((MuFound) || (MuDecay));
    if(TmuThad)
      {
@@ -716,10 +735,339 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        ++TauDecay_Counter;
      }
 
+   
+   //-------------------------- Tau_mu Tau_had Efficiency-------------------
+   for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
+     {
+       
+       if(TauFound)
+	 {
+	   
+	   dRJetGenTau=reco::deltaR(PseudoTauEta,PseudoTauPhi,iJet->eta(),iJet->phi());
+	   
+	 }
+       
+       if(TauDecay)
+	 {
+	   
+	   dRJetGenDecay=reco::deltaR(DecayTauEta,DecayTauPhi,iJet->eta(),iJet->phi());
+	   
+	 }
+       bool GenMatchedCombo=false;                                                                                                                                                                                                                                      
+       bool AnalysisCutCombo=false;
+       
+
+       GenMatchedCombo=((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && (MuFound || MuDecay);        
+       AnalysisCutCombo=((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));  
+       
+       if(GenMatchedCombo && AnalysisCutCombo)
+	 {
+
+	   if(TauFound)                                                                                                           
+	     {                                                                                                                      
+	       DenomComboVis->Fill((double)VisHad.Pt());                                                                            
+	     }                                                                                                                      
+	   if(TauDecay)                                                                                                           
+	     {                                                                                                                    
+	       DenomComboVis->Fill((double)VisDecayHad.Pt());                                                                     
+	     }                                                                                                                    
+                                                                                                                                      
+	   if(MuFound)                                                                                                            
+	     {                                                                                                                    
+	       DenomComboLep->Fill(MuPt);                                                                                         
+	     }                                                                                                                    
+	   if(MuDecay)                                                                                                            
+	     {                                                                                                                    
+	       DenomComboLep->Fill((double)VisDecayMuon.Pt());                                                                    
+	     }                                                                                                                    
+	   bool PassMVACombo=false;
+	   //for(pat::TauCollection::const_iterator iTau = Taus->begin() ; iTau !=Taus->end() ; ++iTau)                             
+	   //{ 
+	       
+	       
+	       for(pat::MuonCollection::const_iterator iMuon = Muon->begin() ; iMuon !=Muon->end() ; ++iMuon)
+		 {
+
+		   bool AnalysisCutsRep= false;
+		   bool GenMatchedRep=false;
+		   if(TauFound)
+		     {
+		       
+		       dRJetGenTauRep=reco::deltaR(PseudoTauEta,PseudoTauPhi,iJet->eta(),iJet->phi());
+		       
+		     }
+		   
+		   if(TauDecay)
+		     {
+		       
+		       dRJetGenDecayRep=reco::deltaR(DecayTauEta,DecayTauPhi,iJet->eta(),iJet->phi());
+		       
+		     }
+		   if(MuFound)
+		     {
+		       dRMuGenMuRep=reco::deltaR(MuEta,MuPhi,iMuon->eta(),iMuon->phi());
+		       
+		     }
+		   if(MuDecay)
+		     {
+		       dRMuGenDecayRep=reco::deltaR(MuDecayEta,MuDecayPhi,iMuon->eta(),iMuon->phi());
+		       
+		     }
+		   GenMatchedRep= ((TauFound && (dRJetGenTauRep < 0.1)) || (TauDecay && (dRJetGenDecayRep <0.1))) && ((MuFound && (dRMuGenMuRep < 0.1)) || (MuDecay && (dRMuGenDecayRep <0.1)));
+		   AnalysisCutsRep= ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
+		   
+		   
+		   if(GenMatchedRep && AnalysisCutsRep)
+		     {
+		       if((MuFound || MuDecay) && (dRMuGenMuRep < 0.1))
+			 {
+			   DRsRep.push_back(dRMuGenMuRep);
+			 }				
+		       if((MuDecay|| MuFound) && (dRMuGenDecayRep <0.1))
+			 {
+			   
+			   DRDecaysRep.push_back(dRMuGenDecayRep);
+			 }            
+		       
+		       
+		     }
+		   
+		   
+		   
+		   
+		   
+		   
+		 }
+	       
+	       double dR_min=99999;
+	       bool dRMatch=false;
+	       if( (MuFound || MuDecay) && (DRsRep.size()) >=2)
+		 {
+
+		   for( unsigned int i=0; i <DRsRep.size() ; i++)
+		     
+		     {
+		       if(DRsRep[i]< dR_min)
+			 {
+			   dR_min=DRsRep[i];
+			   dRMatch=true;
+			 }
+		       
+		     }
+		 }
+	       
+	       double dR_Decay_min=99999;
+	       double dRDecayMatch=false;
+	       if((MuDecay || MuFound) && (DRDecaysRep.size()) >=2)
+		 {
+		   
+		   for(unsigned int i=0; i <DRDecaysRep.size() ; i++)
+		     
+		     {
+		       if(DRDecaysRep[i]< dR_Decay_min)
+			 {
+			   dR_Decay_min=DRDecaysRep[i];
+			   dRDecayMatch=true;
+			 }
+		       
+		     }
+		   
+		   
+		 }
+	       
+	       if((MuFound || MuDecay) && (DRsRep.size())==1)
+		 {
+		   dR_min=DRsRep[0];
+		   
+		   dRMatch=true;
+		 }
+	       if((MuDecay || MuFound) && (DRDecaysRep.size())==1)
+		 {
+		   dR_Decay_min=DRDecaysRep[0];
+		   dRDecayMatch=true;
+		 }
+	       
+	       
+	       for(pat::MuonCollection::const_iterator iMuon = Muon->begin() ; iMuon !=Muon->end() ; ++iMuon)
+		 {
+		   if(MuFound)
+		     {
+		       dRMuGenMu=reco::deltaR(MuEta,MuPhi,iMuon->eta(),iMuon->phi());
+		       
+		     }
+		   if(MuDecay)
+		     {
+		       dRMuGenDecay=reco::deltaR(MuDecayEta,MuDecayPhi,iMuon->eta(),iMuon->phi());
+		       
+		     }
+		   for(pat::TauCollection::const_iterator iTau = Taus->begin() ; iTau !=Taus->end() ; ++iTau)
+		     {
+		       
+		       
+		       dRMuTau=reco::deltaR(*iTau,*iMuon);
+		       dRTauJetCombo=reco::deltaR(*iTau,*iJet);
+		       PassMVACombo=(dRMuTau <0.8) && (dRTauJetCombo < 0.1) &&  ((iTau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (iTau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT"))) && ((MuFound && ((dRMuGenMu==dR_min) && (dRMatch))) || (MuDecay && ((dRMuGenDecay==dR_Decay_min) && (dRDecayMatch))));
+		       
+		       if(PassMVACombo)
+			 {
+			   
+			   
+			   
+			   if(MuFound)
+			     {
+			       NumComboLep->Fill(MuPt);
+			     }
+			   if(MuDecay)
+			     {
+			       NumComboLep->Fill((double)VisDecayMuon.Pt());
+			     }
+			   
+			   
+			   if(TauFound)
+			     {
+			       NumComboVis->Fill((double)VisHad.Pt());
+			     }
+			   if(TauDecay)
+			     {
+			       NumComboVis->Fill((double)VisDecayHad.Pt());
+			     }
+			   
+			   
+			   
+			   
+			 }
+		     }
+		 }
+	       
+	       //}
+	 }
+     }
+   
+
+
+	 
+
+
+
+
+
+
+   
+
+
+
+
+   //-------------------------------Tau had efficiency------------------------------------------
    for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
      {
        
        
+       //Need to Create a replica of the conditions below to fill the vectors appropriately without the chance of running into a rogue for loop problem
+       
+
+
+       for(pat::MuonCollection::const_iterator iMuon = Muon->begin() ; iMuon !=Muon->end() ; ++iMuon)
+         {
+
+	   bool AnalysisCutsRep= false;
+           bool GenMatchedRep=false;
+	   if(TauFound)
+             {
+
+               dRJetGenTauRep=reco::deltaR(PseudoTauEta,PseudoTauPhi,iJet->eta(),iJet->phi());
+
+	     }
+
+           if(TauDecay)
+             {
+
+               dRJetGenDecayRep=reco::deltaR(DecayTauEta,DecayTauPhi,iJet->eta(),iJet->phi());
+
+             }
+           if(MuFound)
+             {
+               dRMuGenMuRep=reco::deltaR(MuEta,MuPhi,iMuon->eta(),iMuon->phi());
+
+             }
+           if(MuDecay)
+             {
+	       dRMuGenDecayRep=reco::deltaR(MuDecayEta,MuDecayPhi,iMuon->eta(),iMuon->phi());
+
+             }
+	   GenMatchedRep= ((TauFound && (dRJetGenTauRep < 0.1)) || (TauDecay && (dRJetGenDecayRep <0.1))) && ((MuFound && (dRMuGenMuRep < 0.1)) || (MuDecay && (dRMuGenDecayRep <0.1)));
+           AnalysisCutsRep= ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
+
+
+	   if(GenMatchedRep && AnalysisCutsRep)
+	     {
+	       if((MuFound || MuDecay) && (dRMuGenMuRep < 0.1))
+		 {
+		   DRsRep.push_back(dRMuGenMuRep);
+		 }				
+	       if((MuDecay|| MuFound) && (dRMuGenDecayRep <0.1))
+		 {
+		   
+		   DRDecaysRep.push_back(dRMuGenDecayRep);
+		 }            
+	       
+	       
+	     }
+	   
+	 
+	 
+	 
+
+
+	 }
+       
+       double dR_min=99999;
+       bool dRMatch=false;
+       if( (MuFound || MuDecay) && (DRsRep.size()) >=2)
+	 {
+	   
+	   for( unsigned int i=0; i <DRsRep.size() ; i++)
+	     
+	     {
+	       if(DRsRep[i]< dR_min)
+		 {
+		   dR_min=DRsRep[i];
+		   dRMatch=true;
+		 }
+	       
+	     }
+	 }
+       
+       double dR_Decay_min=99999;
+       double dRDecayMatch=false;
+       if((MuDecay || MuFound) && (DRDecaysRep.size()) >=2)
+	 {
+	   
+	   for(unsigned int i=0; i <DRDecaysRep.size() ; i++)
+	     
+	     {
+	       if(DRDecaysRep[i]< dR_Decay_min)
+		 {
+		   dR_Decay_min=DRDecaysRep[i];
+		   dRDecayMatch=true;
+		 }
+	       
+	     }
+	  
+
+	 }
+	  
+        if((MuFound || MuDecay) && (DRsRep.size())==1)
+	 {
+	   dR_min=DRsRep[0];
+
+	   dRMatch=true;
+	 }
+       if((MuDecay || MuFound) && (DRDecaysRep.size())==1)
+	 {
+	   dR_Decay_min=DRDecaysRep[0];
+	   dRDecayMatch=true;
+	 }
+      
        
        for(pat::MuonCollection::const_iterator iMuon = Muon->begin() ; iMuon !=Muon->end() ; ++iMuon)
 	 {
@@ -727,11 +1075,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	   
 	   
 
-	   //for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
-	     
-	   //{
-	   //bool PassDecayMode= false;
-	   //bool AnalysisCuts= false;
+	   bool AnalysisCuts= false;
 	   bool GenMatched =false;
 	   bool TauMu =false;
 	   bool TauDecayMu = false;
@@ -766,39 +1110,42 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 	     {
 	       dRTauMu=reco::deltaR(PseudoTauEta,PseudoTauPhi,MuEta,MuPhi);
 	       TauMu=true;
-	       cout<<" dRTauMu: "<< dRTauMu<<endl;
+	       //cout<<" dRTauMu: "<< dRTauMu<<endl;
 
 	     }
 	   if(TauFound && MuDecay)
 	     {
 	       dRTauDecayMu=reco::deltaR(PseudoTauEta,PseudoTauPhi,MuDecayEta,MuDecayPhi);
 	       TauDecayMu = true;
-	       cout<<" dRTauDecayMu: "<< dRTauDecayMu<<endl;
+	       //cout<<" dRTauDecayMu: "<< dRTauDecayMu<<endl;
 
 	     }
 	   if(TauDecay && MuFound)
 	     {
 	       dRDecayTauMu=reco::deltaR(DecayTauEta,DecayTauPhi,MuEta,MuPhi);
 	       DecayTauMu = true;
-	       cout<<" dRDecayTauMu: "<< dRDecayTauMu<<endl;
+	       //cout<<" dRDecayTauMu: "<< dRDecayTauMu<<endl;
 
 	     }
 	   if(TauDecay && MuDecay)
 	     {
 	       dRDecayTauDecayMu=reco::deltaR(DecayTauEta,DecayTauPhi,MuDecayEta,MuDecayPhi);
 	       DecayTauDecayMu= true;
-	       cout<<" dRDecayTauDecayMu: "<< dRDecayTauDecayMu<<endl;
+	       //cout<<" dRDecayTauDecayMu: "<< dRDecayTauDecayMu<<endl;
 	     }
 	   
+	
+	   GenMatched= ((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && ((MuFound && ((dRMuGenMu==dR_min) && (dRMatch))) || (MuDecay && ((dRMuGenDecay==dR_Decay_min) && (dRDecayMatch))));
+	   AnalysisCuts= ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
+	       
 	   
 	       
 
-	       
-	       GenMatched= ((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && ((MuFound && (dRMuGenMu < 0.1)) || (MuDecay && (dRMuGenDecay<0.1)));
-	       //AnalysisCuts= /*((itau->pt()) > 10 && (abs(itau->eta()) <2.3)) &&*/ ((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
-	       
-	       
-	       if(GenMatched /*&& AnalysisCuts*/)
+
+	   
+	   
+	   
+	   if(GenMatched && AnalysisCuts)
 		 {
 		   ++DenomCount;
 		   DenomDMode->Fill(iJet->pt());
@@ -831,23 +1178,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
                      }
 		   
 		   
-		   if(TauMu)
-                     {
-                       DenomTotaldR->Fill(dRTauMu);
-                     }
-                   if(TauDecayMu)
-                     {
-                       DenomTotaldR->Fill(dRTauDecayMu);
-                     }
-                   if(DecayTauMu)
-                     {
-                       DenomTotaldR->Fill(dRDecayTauMu);
-                     }
-                   if (DecayTauDecayMu)
-                     {
-                       DenomTotaldR->Fill(dRDecayTauDecayMu);
-                     }
-		   
+		     
 		   if(TauMu)
                      {
                        DenomIsodR->Fill(dRTauMu);
@@ -888,34 +1219,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		       DenomdRLep->SetDrawOption("COLZ"); 
 		     }
 		   
-
-
-
-
-
-
-		   
-		   if(TauFound)
-                     {
-                       DenomTotalVis->Fill((double)VisHad.Pt());
-
-                     }
-                   if(TauDecay)
-                     {
-		       DenomTotalVis->Fill((double)VisDecayHad.Pt());
-
-                     }
-		   
-		   if(MuFound)
-                     {
-                       DenomTotalLep->Fill(MuPt);
-
-                     }
-                   if(MuDecay)
-                     {
-                       DenomTotalLep->Fill((double)VisDecayMuon.Pt());
-
-                     }
+	   
 		   if(MuFound)
                      {
                        DenomIsoLep->Fill(MuPt);
@@ -927,6 +1231,51 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
                      }
 
+		   
+		   if(TauMu)
+		     {
+		       DenomTotaldR->Fill(dRTauMu);
+		     }
+		   if(TauDecayMu)
+		     {
+		       DenomTotaldR->Fill(dRTauDecayMu);
+		     }
+		   if(DecayTauMu)
+		     {
+		       DenomTotaldR->Fill(dRDecayTauMu);
+		     }
+		   if (DecayTauDecayMu)
+		     {
+		       DenomTotaldR->Fill(dRDecayTauDecayMu);
+		     }
+		   
+		   
+		   if(MuFound)
+		     {
+		       DenomTotalLep->Fill(MuPt);
+		       
+		     }
+		   if(MuDecay)
+		     {
+		       DenomTotalLep->Fill((double)VisDecayMuon.Pt());
+		       
+		     }
+		   
+		   if(TauFound)
+		     {
+                       DenomTotalVis->Fill((double)VisHad.Pt());
+
+                     }
+                   if(TauDecay)
+                     {
+                       DenomTotalVis->Fill((double)VisDecayHad.Pt());
+
+                     }
+
+		     
+		     
+		       //}
+		   ///##################################################
 
 
 
@@ -949,23 +1298,6 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 			   ++NumCount;
 			   NumDMode->Fill(iJet->pt());
 			 }
-		       
-		       // if(TauMu)
-		       // 	 {
-		       // 	   DenomdR->Fill(dRTauMu);
-		       // 	 }
-		       // if(TauDecayMu)
-		       // 	 {
-		       // 	   DenomdR->Fill(dRTauDecayMu);
-		       // 	 }
-		       // if(DecayTauMu)
-		       // 	 {
-		       // 	   DenomdR->Fill(dRDecayTauMu);
-		       // 	 }
-		       // if (DecayTauDecayMu)
-		       // 	 {
-		       // 	   DenomdR->Fill(dRDecayTauDecayMu);
-		       // 	 }
 
 		       if(PassDecayMode)
                          {
@@ -1174,9 +1506,10 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 		   
 	 }
 	       
-	       //}
+     	       //}
 	       
      }
+
        
    
    
@@ -1196,15 +1529,10 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 
 
-
-
-
-
-
    
-
+   //Just Tau_Had Isolation Efficiency
    for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
-
+     
      {
 
        bool PassDecayMode= false;
@@ -1272,6 +1600,7 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
 
      }
+
    for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
 
      {
@@ -1302,8 +1631,8 @@ TauEfficiencyMu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
    std::cout<< "TaumuTauhad: "<< Counter <<std::endl;
    std::cout<< "TauHad_Count : "<< TauHad_Counter <<std::endl;
    std::cout<< "TauDecay_Count : "<< TauDecay_Counter <<std::endl;
-
 }
+
 
 
 // ------------ method called once each job just before starting event loop  ------------
