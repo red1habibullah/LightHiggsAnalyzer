@@ -480,7 +480,7 @@ ElectronEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
    
    double dR_Decay_min=99999;
    double dRDecayMatch=false;
-   if(EleFound && (DRDecays.size()) >=2)
+   if(EleDecay && (DRDecays.size()) >=2)
      {
 
        for(unsigned int i=0; i <DRDecays.size() ; i++)

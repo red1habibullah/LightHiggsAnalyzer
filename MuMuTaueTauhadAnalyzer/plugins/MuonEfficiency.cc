@@ -386,7 +386,7 @@ MuonEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    
    double dR_Decay_min=99999;
    double dRDecayMatch=false;
-   if(MuFound && (DRDecays.size()) >=2)
+   if(MuDecay && (DRDecays.size()) >=2)
      {
 
        for(unsigned int i=0; i <DRDecays.size() ; i++)

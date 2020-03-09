@@ -94,8 +94,11 @@ private:
   
   edm::EDGetTokenT<pat::ElectronCollection> Ele_;
   
-  edm::EDGetTokenT<reco::PFJetCollection> jetSrc_;
+  //edm::EDGetTokenT<pat::ElectronCollection> FullEle_;
 
+  edm::EDGetTokenT<reco::PFJetCollection> jetSrc_;
+  
+  
 
   TEfficiency* TauEff;
   
@@ -187,6 +190,7 @@ private:
   double dRTauDecayEle=99999;
   double dRDecayTauDecayEle=99999;
 
+  //double dREleRecoEle=99999;
   int NumCount=0;
   int DenomCount=0;
   
@@ -214,6 +218,7 @@ TauEfficiency::TauEfficiency(const edm::ParameterSet& iConfig):
   TauSrc_(consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("Taus"))),
   prunedGenToken_ (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("pruned"))),
   Ele_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("Ele"))),
+  //FullEle_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("FullEle"))),
   jetSrc_(consumes<reco::PFJetCollection>(iConfig.getParameter<edm::InputTag>("jetSrc")))
 {
    //now do what ever initialization is needed
@@ -429,6 +434,11 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
    edm::Handle<pat::ElectronCollection> electron;
    iEvent.getByToken(Ele_,electron);
+   
+   //edm::Handle<pat::ElectronCollection> Fullelectron;
+   //iEvent.getByToken(FullEle_,Fullelectron);
+
+
    
    edm::Handle<reco::PFJetCollection> pfJets;
    iEvent.getByToken(jetSrc_, pfJets);
@@ -665,6 +675,16 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    
 
+   
+
+
+
+
+
+
+
+
+
    for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end() ; ++itau)
 
      {
@@ -742,6 +762,152 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      }
 
 
+
+
+
+
+
+
+
+
+
+
+
+   //-----------Tau_e Tau_had final state.......independant implementation------------
+
+   for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
+     {
+     
+       
+       //for(pat::ElectronCollection::const_iterator iEle = Fullelectron->begin() ; iEle !=Fullelectron->end() ; ++iEle)
+       //{
+
+	   bool GenMatchedCombo=false;                                                                                          
+	   bool AnalysisCutCombo=false;
+	   if(TauFound)
+	     {
+      
+	       dRJetGenTau=reco::deltaR(PseudoTauEta,PseudoTauPhi,iJet->eta(),iJet->phi());
+	     }
+
+	   if(TauDecay)
+	     {
+	                                          
+	       dRJetGenDecay=reco::deltaR(DecayTauEta,DecayTauPhi,iJet->eta(),iJet->phi());
+
+	     }
+	   
+
+
+
+
+	   AnalysisCutCombo=((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3)); 
+	   GenMatchedCombo=((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && (EleFound || EleDecay);
+	   
+	   if(GenMatchedCombo && AnalysisCutCombo)                                                                              
+                 {                                                                                                                    
+                                                                                                                                      
+                   if(TauFound)                                                                                                       
+                     {                                                                                                                
+                       DenomComboVis->Fill((double)VisHad.Pt());                                                                      
+                                                                                                                                      
+                     }                                                                                                                
+                   if(TauDecay)                                                                                                       
+                     {                                                                                                                
+                       DenomComboVis->Fill((double)VisDecayHad.Pt());                                                                 
+                                                                                                                                      
+                     }                                                                                                                
+                                                                                                                                      
+                   if(EleFound)
+		     {                                                                                                                
+                       DenomComboLep->Fill(ElePt);
+		     }                                                                                                                
+                   if(EleDecay)                                                                                                       
+                     {           
+                       DenomComboLep->Fill((double)VisDecayElectron.Pt());
+		     }                                                                                                                
+		                                                                                                                       
+                   bool PassMVACombo=false;                                                                                           
+                   for(pat::TauCollection::const_iterator iTau = Taus->begin() ; iTau !=Taus->end() ; ++iTau)                         
+                     { 
+
+		       for(pat::ElectronCollection::const_iterator iele = electron->begin() ; iele !=electron->end() ; ++iele)
+			 {
+
+			   if(EleFound)
+			     {
+			       dREleGenEle=reco::deltaR(EleEta,ElePhi,iele->eta(),iele->phi());
+			       
+			     }
+			   if(EleDecay)
+			     {
+			       dREleGenDecay=reco::deltaR(EleDecayEta,EleDecayPhi,iele->eta(),iele->phi());
+			       
+			     }
+	   
+			   dREleTau=reco::deltaR(*iTau,*iele);
+			   dRTauJetCombo=reco::deltaR(*iTau,*iJet);
+			   PassMVACombo=(dREleTau <0.8) && (dRTauJetCombo < 0.1) &&  ((iTau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (iTau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT"))) && ((EleFound && (dREleGenEle < 0.1)) || (EleDecay && (dREleGenDecay<0.1)));                      
+			   
+			   if(PassMVACombo)                                                                                               
+			     {                                                                                                            
+			       
+			       if(TauFound)                                                                                               
+				 {                                                                                                        
+				   NumComboVis->Fill((double)VisHad.Pt());                                                                
+				   
+				 }                                                                                                        
+			       if(TauDecay)                                                                                               
+				 {                                                                                                        
+				   NumComboVis->Fill((double)VisDecayHad.Pt());                                                           
+				   
+				 }                                                                                                        
+			       if(EleFound)                                                                                               
+				 {                                                                                                        
+				   NumComboLep->Fill(ElePt);                                                                              
+				   
+				 }                                                                                                        
+			       if(EleDecay)                                                                                               
+				 {                                                                                                        
+				   NumComboLep->Fill((double)VisDecayElectron.Pt());                                                      
+				   
+				 }                                                                                                        
+			       
+                               
+                               
+			     }         
+			   
+			   
+			   
+			 }
+		       
+		       
+		       
+		       
+		       
+		     }
+		   
+		   
+		   
+		   
+		 }   
+	   
+	   
+	   
+	   
+     }
+   
+
+
+
+
+
+
+
+
+
+
+
  
    for (reco::PFJetCollection::const_iterator iJet = pfJets->begin(); iJet != pfJets->end(); ++iJet)
      {
@@ -758,8 +924,8 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	       bool TauDecayEle = false;
 	       bool DecayTauEle = false;
 	       bool DecayTauDecayEle= false;
-	       bool GenMatchedCombo=false;
-	       bool AnalysisCutCombo=false;
+	       //bool GenMatchedCombo=false;
+	       //bool AnalysisCutCombo=false;
 	       //bool JetTauMatch=false;
 	       
 	       if(TauFound)
@@ -816,12 +982,12 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	       
 	       //=================================Tau_e Tau_had efficiency=================
-	       
-	       GenMatchedCombo=((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && (EleFound || EleDecay);
-	       AnalysisCutCombo=((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
+	       //**Has to be written separately to prevent Bias in denomonator
+	       //GenMatchedCombo=((TauFound && (dRJetGenTau < 0.1)) || (TauDecay && (dRJetGenDecay<0.1))) && (EleFound || EleDecay);
+	       //AnalysisCutCombo=((iJet->pt() > 10) && (fabs(iJet->eta()) <2.3));
 
 	    
-	       if(GenMatchedCombo && AnalysisCutCombo)
+	       /*if(GenMatchedCombo && AnalysisCutCombo)
 		 {
 		 
 		   if(TauFound)
@@ -899,6 +1065,7 @@ TauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
 		 }
+	       */
 
 
 
