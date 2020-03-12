@@ -1,5 +1,8 @@
 # Import CMS python class definitions such as Process, Source, and EDProducer
 import FWCore.ParameterSet.Config as cms
+from PhysicsTools.PatAlgos.tools.helpers import cloneProcessingSnippet
+from PhysicsTools.PatAlgos.tools.helpers import massSearchReplaceAnyInputTag
+
 #this should be used finally
 
 
@@ -179,7 +182,7 @@ process.source = cms.Source("PoolSource",
 
 
 
-                            
+##############################################################################################################################                            
 process.JetFakeTau =cms.EDAnalyzer("JetFakeTauEfficiency",
                                    Taus=cms.InputTag("slimmedTaus"),
                                    jetSrc=cms.InputTag("ak4PFJets"),
@@ -227,11 +230,259 @@ process.JetFakeTauMTight =cms.EDAnalyzer("JetFakeTauEfficiency",
 process.JetGenFilter = cms.EDFilter("JetStudyGenFilter",
                                      pruned  = cms.InputTag("prunedGenParticles"),
                                      )
+####################################################################################################################################
+############################################################## embed 2017v2 tauID into the miniAOD #################################                                                                                                                           
+
+
+############################ Load the Tau New ID Embedder###################                                                                                                                                                                                                   
+from LightHiggsAnalyzer.MuMuTaueTauhadAnalyzer.RerunTauIdMVA_slimmedTaus import *
+IdEmbed = TauIDEmbedder(process, cms,
+                        debug = True,
+                        toKeep = ["2017v2"]
+                        )
+IdEmbed.runTauID()
+#####################################################################################################                                                                                                                                                                          
+process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 
 
 
 
+
+process.rerunTauIDSequence = cms.Sequence(process.rerunMvaIsolationSequence * process.slimmedTausNewID)
+
+####################################### Clone and redo the process for all the other Tau collections###########################                                                                                                                                                
+
+process.rerunTauIDSequenceMuonCleaned=cloneProcessingSnippet(process,process.rerunTauIDSequence,'MuonCleaned', addToTask =False)
+massSearchReplaceAnyInputTag(process.rerunTauIDSequenceMuonCleaned,cms.InputTag('slimmedTaus'),cms.InputTag('slimmedTausMuonCleaned'))
+
+process.rerunTauIDSequenceMuonCleanedMedium=cloneProcessingSnippet(process,process.rerunTauIDSequence,'MuonCleanedMedium', addToTask =False)
+massSearchReplaceAnyInputTag(process.rerunTauIDSequenceMuonCleanedMedium,cms.InputTag('slimmedTaus'),cms.InputTag('slimmedTausMuonCleanedMedium'))
+
+process.rerunTauIDSequenceMuonCleanedTight=cloneProcessingSnippet(process,process.rerunTauIDSequence,'MuonCleanedTight', addToTask =False)
+massSearchReplaceAnyInputTag(process.rerunTauIDSequenceMuonCleanedTight,cms.InputTag('slimmedTaus'),cms.InputTag('slimmedTausMuonCleanedTight'))
+
+process.rerunTauIDSequenceElectronCleaned=cloneProcessingSnippet(process,process.rerunTauIDSequence,'ElectronCleaned', addToTask =False)
+massSearchReplaceAnyInputTag(process.rerunTauIDSequenceElectronCleaned,cms.InputTag('slimmedTaus'),cms.InputTag('slimmedTausElectronCleaned'))
+
+process.rerunTauIDSequenceElectronCleanedMedium=cloneProcessingSnippet(process,process.rerunTauIDSequence,'ElectronCleanedMedium', addToTask =False)
+massSearchReplaceAnyInputTag(process.rerunTauIDSequenceElectronCleanedMedium,cms.InputTag('slimmedTaus'),cms.InputTag('slimmedTausElectronCleanedMedium'))
+
+
+process.rerunTauIDSequenceElectronCleanedTight=cloneProcessingSnippet(process,process.rerunTauIDSequence,'ElectronCleanedTight', addToTask =False)
+massSearchReplaceAnyInputTag(process.rerunTauIDSequenceElectronCleanedTight,cms.InputTag('slimmedTaus'),cms.InputTag('slimmedTausElectronCleanedTight'))
+######################################################## MVA Isolation variable based Tau Efficiency Modules###########################################                                                                                                                        
+###################################UnCleaned Versions #############################################################################################                                                                                                                        
+
+process.JetFakeTauVVLoose =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewID"),
+                                          jetSrc=cms.InputTag("ak4PFJets"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVVLooseIsolationMVArun2017v2DBoldDMwLT2017"),
+                                          
+                                          )
+process.JetFakeTauVLoose =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewID"),
+                                          jetSrc=cms.InputTag("ak4PFJets"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVLooseIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauLoose =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewID"),
+                                          jetSrc=cms.InputTag("ak4PFJets"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byLooseIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauMedium =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewID"),
+                                          jetSrc=cms.InputTag("ak4PFJets"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byMediumIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauTight =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewID"),
+                                          jetSrc=cms.InputTag("ak4PFJets"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byTightIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauVTight =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewID"),
+                                          jetSrc=cms.InputTag("ak4PFJets"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVTightIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauVVTight =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewID"),
+                                          jetSrc=cms.InputTag("ak4PFJets"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVVTightIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+########################################################################################################################################################
+#######################################################################MuonCleaned######################################################################
+
+process.JetFakeTauMuVVLoose =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDMuonCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsMuonCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVVLooseIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+process.JetFakeTauMuVLoose =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDMuonCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsMuonCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVLooseIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauMuLoose =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDMuonCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsMuonCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byLooseIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauMuMedium =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDMuonCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsMuonCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byMediumIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauMuTight =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDMuonCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsMuonCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byTightIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+process.JetFakeTauMuVTight =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDMuonCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsMuonCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVTightIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauMuVVTight =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDMuonCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsMuonCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVVTightIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+
+
+
+#########################################################Electron Cleaned################################################################################################
+process.JetFakeTauEleVVLoose =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDElectronCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsElectronCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVVLooseIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+process.JetFakeTauEleVLoose =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDElectronCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsElectronCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVLooseIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauEleLoose =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDElectronCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsElectronCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byLooseIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauEleMedium=cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDElectronCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsElectronCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byMediumIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+
+process.JetFakeTauEleTight =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDElectronCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsElectronCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byTightIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+process.JetFakeTauEleVTight =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDElectronCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsElectronCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVTightIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+process.JetFakeTauEleVVTight =cms.EDAnalyzer("JetFakeTauEfficiencyMVA",
+                                          Taus=cms.InputTag("slimmedTausNewIDElectronCleaned"),
+                                          jetSrc=cms.InputTag("ak4PFJetsElectronCleaned"),
+                                          pruned  = cms.InputTag("prunedGenParticles"),
+                                          TauIdRawValue=cms.string("byIsolationMVArun2017v2DBoldDMwLTraw2017"),
+                                          TauIdMVAWP=cms.string("byVVTightIsolationMVArun2017v2DBoldDMwLT2017"),
+
+                                          )
+
+
+
+########################################################################################################################################################
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 
@@ -239,7 +490,7 @@ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 process.TFileService = cms.Service("TFileService",
                                    #fileName = cms.string('file:test_Validate_NumberCompare_MMatched_Ini.root')
-                                   fileName = cms.string('file:JetFakeTau_AllID_Rebin.root')
+                                   fileName = cms.string('file:JetFakeTau_NewTauID.root')
                                    )
 
 
@@ -249,10 +500,15 @@ process.TFileService = cms.Service("TFileService",
 
 
 
+process.me=cms.Path(process.rerunTauIDSequence*process.rerunTauIDSequenceMuonCleaned*process.rerunTauIDSequenceMuonCleanedMedium*process.rerunTauIDSequenceMuonCleanedTight*process.rerunTauIDSequenceElectronCleaned*process.rerunTauIDSequenceElectronCleanedMedium*process.rerunTauIDSequenceElectronCleanedTight)
+process.JetFake=cms.Path(process.JetGenFilter*process.JetFakeTauVVLoose*process.JetFakeTauVLoose*process.JetFakeTauLoose*process.JetFakeTauMedium*process.JetFakeTauTight*process.JetFakeTauVTight*process.JetFakeTauVVTight)
+process.JetFakeMu=cms.Path(process.JetGenFilter*process.JetFakeTauMuVVLoose*process.JetFakeTauMuVLoose*process.JetFakeTauMuLoose*process.JetFakeTauMuMedium*process.JetFakeTauMuTight*process.JetFakeTauMuVTight*process.JetFakeTauMuVVTight)
+process.JetFakeEle=cms.Path(process.JetGenFilter*process.JetFakeTauEleVVLoose*process.JetFakeTauEleVLoose*process.JetFakeTauEleLoose*process.JetFakeTauEleMedium*process.JetFakeTauEleTight*process.JetFakeTauEleVTight*process.JetFakeTauEleVVTight)
 
 
 
+#process.effu=cms.Path(process.GenModeFilterMu*process.DiMuFilter*process.ThirdMuFilter*process.TauEffVVLoose*process.TauEffVLoose*process.TauEffLoose*process.TauEffMedium*process.TauEffTight*process.TauEffVTight*process.TauEffVVTight)
+#process.effele=cms.Path(process.GenModeFilter*process.DiMuFilter*process.LooseFilter*process.TauEffEleVVLoose*process.TauEffEleVLoose*process.TauEffEleLoose*process.TauEffEleMedium*process.TauEffEleTight*process.TauEffEleVTight*process.TauEffEleVVTight)
+#process.p =cms.Path(process.JetGenFilter*process.JetFakeTau*process.JetFakeTauELoose*process.JetFakeTauEMedium*process.JetFakeTauETight*process.JetFakeTauMLoose*process.JetFakeTauMMedium*process.JetFakeTauMTight)
 
-
-
-process.p =cms.Path(process.JetGenFilter*process.JetFakeTau*process.JetFakeTauELoose*process.JetFakeTauEMedium*process.JetFakeTauETight*process.JetFakeTauMLoose*process.JetFakeTauMMedium*process.JetFakeTauMTight)
+process.schedule=cms.Schedule(process.me,process.JetFake,process.JetFakeMu,process.JetFakeEle)

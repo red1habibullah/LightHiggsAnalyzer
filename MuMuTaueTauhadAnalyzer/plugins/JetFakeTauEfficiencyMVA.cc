@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
 // Package:    LightHiggsAnalyzer/MuMuTaueTauhadAnalyzer
-// Class:      JetFakeTauEfficiency
+// Class:      JetFakeTauEfficiencyMVA
 // 
-/**\class JetFakeTauEfficiency JetFakeTauEfficiency.cc LightHiggsAnalyzer/MuMuTaueTauhadAnalyzer/plugins/JetFakeTauEfficiency.cc
+/**\class JetFakeTauEfficiencyMVA JetFakeTauEfficiencyMVA.cc LightHiggsAnalyzer/MuMuTaueTauhadAnalyzer/plugins/JetFakeTauEfficiencyMVA.cc
 
  Description: [one line class summary]
 
@@ -59,10 +59,10 @@
 // constructor "usesResource("TFileService");"
 // This will improve performance in multithreaded jobs.
 
-class JetFakeTauEfficiency : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
+class JetFakeTauEfficiencyMVA : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
    public:
-      explicit JetFakeTauEfficiency(const edm::ParameterSet&);
-      ~JetFakeTauEfficiency();
+      explicit JetFakeTauEfficiencyMVA(const edm::ParameterSet&);
+      ~JetFakeTauEfficiencyMVA();
   std::vector<const reco::Candidate*>FindStat1( const reco::Candidate * particle);
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
@@ -101,7 +101,10 @@ class JetFakeTauEfficiency : public edm::one::EDAnalyzer<edm::one::SharedResourc
   TH1F* DenomTau;
   TH1D* TauPt;
   //int MuDecay=0;
-  
+  std::string TauIdRawValue_;
+  std::string TauIdMVAWP_;
+
+
 };
 
 //
@@ -115,10 +118,14 @@ class JetFakeTauEfficiency : public edm::one::EDAnalyzer<edm::one::SharedResourc
 //
 // constructors and destructor
 //
-JetFakeTauEfficiency::JetFakeTauEfficiency(const edm::ParameterSet& iConfig):
+JetFakeTauEfficiencyMVA::JetFakeTauEfficiencyMVA(const edm::ParameterSet& iConfig):
   TauSrc_(consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("Taus"))),
   jetSrc_(consumes<reco::PFJetCollection>(iConfig.getParameter<edm::InputTag>("jetSrc"))),
-  prunedGenToken_ (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("pruned")))
+  prunedGenToken_ (consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("pruned"))),
+  TauIdRawValue_(iConfig.getParameter<std::string>("TauIdRawValue")),
+  TauIdMVAWP_(iConfig.getParameter<std::string>("TauIdMVAWP"))
+
+
 
 {
   //now do what ever initialization is needed
@@ -143,7 +150,7 @@ JetFakeTauEfficiency::JetFakeTauEfficiency(const edm::ParameterSet& iConfig):
 }
 
 
-JetFakeTauEfficiency::~JetFakeTauEfficiency()
+JetFakeTauEfficiencyMVA::~JetFakeTauEfficiencyMVA()
 {
  
    // do anything here that needs to be done at desctruction time
@@ -151,7 +158,7 @@ JetFakeTauEfficiency::~JetFakeTauEfficiency()
 
 }
 
-std::vector<const reco::Candidate*>JetFakeTauEfficiency::FindStat1( const reco::Candidate * particle)
+std::vector<const reco::Candidate*>JetFakeTauEfficiencyMVA::FindStat1( const reco::Candidate * particle)
 {
 
   std::vector<const reco::Candidate*> visParticles;
@@ -206,7 +213,7 @@ std::vector<const reco::Candidate*>JetFakeTauEfficiency::FindStat1( const reco::
 
 // ------------ method called for each event  ------------
 void
-JetFakeTauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+JetFakeTauEfficiencyMVA::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
   using namespace std;
@@ -313,7 +320,7 @@ JetFakeTauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 		   
 		   dRJetTauMatch=reco::deltaR(*iJet,*itau);
 		   
-		   PassMVAnDMode=((itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")) && (itau->tauID("decayModeFinding")) && (dRJetTauMatch < 0.1));
+		   PassMVAnDMode=((itau->tauID(TauIdRawValue_) >-0.5) && (itau->tauID(TauIdMVAWP_)) && (itau->tauID("decayModeFinding")) && (dRJetTauMatch < 0.1));
 		   
 		   if(PassMVAnDMode)
 		     {
@@ -333,7 +340,7 @@ JetFakeTauEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 		       DenomDM->Fill(itau->pt());
 		       
 		       bool Num=false;
-		       Num=(itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5) && (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT"));
+		       Num=(itau->tauID(TauIdRawValue_) >-0.5) && (itau->tauID(TauIdMVAWP_));
 		       if(Num)
 			 {
 			   NumDM->Fill(itau->pt());
@@ -432,7 +439,7 @@ for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end()
 	     DenomTau->Fill(itau->pt());
 
 	     bool NumCond=false; 
-	     NumCond= (itau->tauID("byMediumIsolationMVArun2v1DBoldDMwLT")) && (itau->tauID("byIsolationMVArun2v1DBoldDMwLTraw") >-0.5);
+	     NumCond= (itau->tauID(TauIdMVAWP_)) && (itau->tauID(TauIdRawValue_) >-0.5);
 	 
 	     if (NumCond)
 	       {
@@ -461,19 +468,19 @@ for(pat::TauCollection::const_iterator itau = Taus->begin() ; itau !=Taus->end()
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-JetFakeTauEfficiency::beginJob()
+JetFakeTauEfficiencyMVA::beginJob()
 {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-JetFakeTauEfficiency::endJob() 
+JetFakeTauEfficiencyMVA::endJob() 
 {
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-JetFakeTauEfficiency::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+JetFakeTauEfficiencyMVA::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -482,4 +489,4 @@ JetFakeTauEfficiency::fillDescriptions(edm::ConfigurationDescriptions& descripti
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(JetFakeTauEfficiency);
+DEFINE_FWK_MODULE(JetFakeTauEfficiencyMVA);
