@@ -71,7 +71,7 @@ class TauValidationAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResour
       virtual void endJob() override;
 
       // ----------member data ---------------------------
-  TauIdMVAAuxiliaries clusterVariables_;
+  //TauIdMVAAuxiliaries clusterVariables_;
   
   // Get the Necessary Tokens
   edm::EDGetTokenT<pat::TauCollection> TauSrc_;

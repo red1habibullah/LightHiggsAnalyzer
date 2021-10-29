@@ -47,6 +47,7 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/TauPFSpecific.h"
 
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/JetReco/interface/Jet.h"
 //
 // class declaration

@@ -42,17 +42,16 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
-#include "DataFormats/PatCandidates/interface/TauPFSpecific.h"
 
+#include "DataFormats/PatCandidates/interface/TauPFSpecific.h"
 #include "DataFormats/JetReco/interface/Jet.h"
 
 #include "TEfficiency.h"
-
 #include "Math/LorentzVector.h"
 
 #include "Math/VectorUtil.h"
-
 #include "TLorentzVector.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 //
 // class declaration
 //

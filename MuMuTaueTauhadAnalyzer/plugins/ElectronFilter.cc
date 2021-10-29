@@ -46,9 +46,11 @@ The values have been updated for 2017 MC/Data
 #include "DataFormats/EgammaCandidates/interface/GsfElectronCore.h"
 
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
-#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
+#include "CommonTools/Egamma/interface/ConversionTools.h"
+//#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 
-#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
+//#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
+#include "CommonTools/Egamma/interface/EffectiveAreas.h"
 #include "PhysicsTools/SelectorUtils/interface/CutApplicatorWithEventContentBase.h"
 
 #include "DataFormats/EgammaCandidates/interface/ConversionFwd.h"
@@ -186,38 +188,6 @@ int ElectronFilter::GsfEleMissingHitsCut(pat::ElectronCollection::const_iterator
       ele->gsfTrack()->hitPattern().numberOfAllHits(missingHitType);
     return mHits;
 }
-/*double ElectronFilter::GsfEleEffAreaPFIsoCut(pat::ElectronCollection::const_iterator ele,edm::Event& iEvent)
-{
-  //Compute the combined isolation with effective area correction
-
-
-  for(unsigned i=0;i<EA.size();i++)
-    {
-      if(ele->eta() > Etamin[i] && ele->eta() <Etamax[i])
-        {
-          effA=EA[i];
-        }
-    }
-  const reco::GsfElectron::PflowIsolationVariables& pfIso  = ele->pfIsolationVariables();
-  const float chad = pfIso.sumChargedHadronPt;
-  const float nhad = pfIso.sumNeutralHadronEt;
-  const float pho = pfIso.sumPhotonEt;
-  // float  eA = effA;
-  //float rho = (float)(*_rhoHandle); // std::max likes float arguments
-  edm::Handle<double>_rhoHandle;
-  iEvent.getByToken(rho_,_rhoHandle);
-  rhos = *(_rhoHandle.product());
-  float iso = chad + std::max(0.0f, nhad + pho-effA*rhos);
-
-  // Divide by pT if the relative isolation is requested
-  //if( _isRelativeIso )
-  iso /= ele->pt();
-
-  // Apply the cut and return the result
-  return iso;
-
-}
-*/
 
 
 bool ElectronFilter::GsfEleConversionVetoCut(pat::ElectronCollection::const_iterator ele ,edm::Event& iEvent)
@@ -228,7 +198,7 @@ bool ElectronFilter::GsfEleConversionVetoCut(pat::ElectronCollection::const_iter
   edm::Handle<reco::BeamSpot> thebs;
   iEvent.getByToken(thebs_,thebs);
   if(thebs.isValid() && convs.isValid() ) {
-    return !ConversionTools::hasMatchedConversion(*ele,convs,
+    return !ConversionTools::hasMatchedConversion(*ele,*convs,
 						  thebs->position());
   } else {
     edm::LogWarning("GsfEleConversionVetoCut")
