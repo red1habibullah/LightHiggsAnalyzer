@@ -54,6 +54,8 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "DataFormats/JetReco/interface/Jet.h"
+
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "TEfficiency.h"
 
 

@@ -31,7 +31,7 @@
 #include "FWCore/Utilities/interface/StreamID.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 
 //
 // class declaration

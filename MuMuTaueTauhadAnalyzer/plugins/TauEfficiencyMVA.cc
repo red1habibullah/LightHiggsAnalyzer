@@ -59,6 +59,8 @@
 
 #include "Math/VectorUtil.h"
 #include "TLorentzVector.h"
+
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 //
 // class declaration
 //

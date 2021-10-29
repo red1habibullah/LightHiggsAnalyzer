@@ -46,9 +46,11 @@ The values have been updated for 2017 MC/Data
 #include "DataFormats/EgammaCandidates/interface/GsfElectronCore.h"
 
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
-#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
+#include "CommonTools/Egamma/interface/ConversionTools.h"
+//#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 
-#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
+//#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
+#include "CommonTools/Egamma/interface/EffectiveAreas.h"
 #include "PhysicsTools/SelectorUtils/interface/CutApplicatorWithEventContentBase.h"
 
 #include "DataFormats/EgammaCandidates/interface/ConversionFwd.h"
@@ -221,7 +223,7 @@ bool ElectronFilterTight::GsfEleConversionVetoCut(pat::ElectronCollection::const
   edm::Handle<reco::BeamSpot> thebs;
   iEvent.getByToken(thebs_,thebs);
   if(thebs.isValid() && convs.isValid() ) {
-    return !ConversionTools::hasMatchedConversion(*ele,convs,
+    return !ConversionTools::hasMatchedConversion(*ele,*convs,
 						  thebs->position());
   } else {
     edm::LogWarning("GsfEleConversionVetoCut")

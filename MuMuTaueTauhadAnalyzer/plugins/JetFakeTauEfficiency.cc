@@ -48,7 +48,7 @@
 
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "TEfficiency.h"
-
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 //
 // class declaration
 //

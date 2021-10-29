@@ -47,7 +47,7 @@
 #include "DataFormats/PatCandidates/interface/TauPFSpecific.h"
 
 #include "DataFormats/JetReco/interface/Jet.h"
-
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 
 
 
